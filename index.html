@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMA Negeri Insan Cendekia Nusantara — Mencetak Pemimpin Masa Depan</title>
+  <meta name="description" content="SMA Negeri Insan Cendekia Nusantara — Sekolah unggulan berbasis riset, karakter, dan kepemimpinan. Jakarta Selatan." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0A2540',
+            gold: '#D4AF37',
+            'gold-light': '#E8C84A',
+            'bg-light': '#F8FAFC',
+            'dark-bg': '#0F172A',
+            'dark-surface': '#1E293B',
+            'dark-text': '#F1F5F9',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* ===== BASE ===== */
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8FAFC;
+      color: #0A2540;
+      overflow-x: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark body {
+      background-color: #0F172A;
+      color: #F1F5F9;
+    }
+
+    /* Anchor offset */
+    section, [id] { scroll-margin-top: 80px; }
+
+    /* Body text constraint */
+    .prose-constrain { max-width: 75ch; }
+
+    /* ===== NAVBAR ===== */
+    .navbar-glass {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(248, 250, 252, 0.82);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .dark .navbar-glass {
+      background: rgba(15, 23, 42, 0.88);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+    }
+
+    /* ===== HERO ===== */
+    .hero-bg {
+      background-image:
+        linear-gradient(to bottom right, rgba(10,37,64,0.88) 0%, rgba(10,37,64,0.55) 50%, rgba(10,37,64,0.82) 100%),
+        url('https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=1600&q=80&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center 30%;
+    }
+    .dark .hero-bg {
+      background-image:
+        linear-gradient(to bottom right, rgba(15,23,42,0.93) 0%, rgba(10,37,64,0.72) 50%, rgba(15,23,42,0.92) 100%),
+        url('https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=1600&q=80&auto=format&fit=crop');
+    }
+
+    .hero-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .gold-line {
+      display: inline-block;
+      width: 3.5rem;
+      height: 3px;
+      background: #D4AF37;
+      border-radius: 2px;
+    }
+
+    /* Animated underline */
+    .gold-underline {
+      position: relative;
+      display: inline;
+    }
+    .gold-underline::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 100%; height: 3px;
+      background: #D4AF37;
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .gold-underline:hover::after { transform: scaleX(1); }
+
+    /* ===== SECTION LABELS ===== */
+    .section-label {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #D4AF37;
+    }
+
+    /* ===== PROGRAM STAGGER ===== */
+    .program-track {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .program-track {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0;
+      }
+      .program-card:nth-child(2) { margin-top: 3rem; }
+      .program-card:nth-child(3) { margin-top: 6rem; }
+    }
+
+    .program-card {
+      flex: 1;
+      margin: 0 0.75rem;
+      background: white;
+      border-radius: 1.25rem;
+      padding: 2rem 1.75rem;
+      border: 1px solid rgba(10,37,64,0.08);
+      box-shadow: 0 4px 24px rgba(10,37,64,0.07);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .program-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(10,37,64,0.13);
+    }
+    .dark .program-card {
+      background: #1E293B;
+      border-color: rgba(212,175,55,0.12);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    .dark .program-card:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+    }
+
+    /* ===== PRESTASI ===== */
+    .prestasi-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .prestasi-grid {
+        grid-template-columns: 2fr 1.5fr 1fr;
+        align-items: end;
+        gap: 2rem;
+      }
+    }
+
+    /* ===== FASILITAS STACK ===== */
+    .fasilitas-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.25rem;
+      min-height: 240px;
+      cursor: pointer;
+    }
+    .fasilitas-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .fasilitas-card:hover img { transform: scale(1.05); }
+    .fasilitas-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,37,64,0.88) 0%, transparent 60%);
+      transition: background 0.3s;
+    }
+    .fasilitas-card:hover .fasilitas-overlay {
+      background: linear-gradient(to top, rgba(10,37,64,0.95) 10%, rgba(10,37,64,0.3) 80%);
+    }
+
+    /* ===== GALLERY ASIMETRIS ===== */
+    .gallery-asymmetric {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 0.75rem;
+    }
+    .gallery-asymmetric .g-big {
+      grid-row: span 2;
+    }
+    .gallery-asymmetric img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 0.875rem;
+      display: block;
+      min-height: 140px;
+    }
+    @media (min-width: 768px) {
+      .gallery-asymmetric { gap: 1rem; }
+      .gallery-asymmetric img { min-height: 200px; }
+    }
+
+    /* ===== PPDB ===== */
+    .ppdb-card {
+      border: 2px solid #D4AF37;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 48px rgba(212,175,55,0.2), 0 2px 16px rgba(10,37,64,0.12);
+      background: white;
+      transition: box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .ppdb-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #D4AF37 0%, #F0D060 50%, #D4AF37 100%);
+    }
+    .dark .ppdb-card {
+      background: #1E293B;
+      box-shadow: 0 8px 48px rgba(212,175,55,0.15), 0 2px 24px rgba(0,0,0,0.4);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #D4AF37 0%, #E8C84A 100%);
+      color: #0A2540;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      padding: 0.875rem 2.25rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      min-height: 44px;
+      text-decoration: none;
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,175,55,0.4);
+      filter: brightness(1.05);
+    }
+
+    .btn-outline-gold {
+      border: 2px solid #D4AF37;
+      color: #D4AF37;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      padding: 0.875rem 2.25rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      background: transparent;
+      min-height: 44px;
+      text-decoration: none;
+    }
+    .btn-outline-gold:hover {
+      background: rgba(212,175,55,0.12);
+      transform: translateY(-2px);
+    }
+
+    /* ===== TESTI ===== */
+    .testi-card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 2rem 1.75rem;
+      border-left: 4px solid #D4AF37;
+      box-shadow: 0 4px 24px rgba(10,37,64,0.07);
+    }
+    .dark .testi-card {
+      background: #1E293B;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    }
+
+    /* ===== BERITA ===== */
+    .berita-item {
+      border-bottom: 1px solid rgba(10,37,64,0.1);
+      padding: 1.25rem 0;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      transition: padding-left 0.2s;
+    }
+    .berita-item:hover { padding-left: 0.5rem; }
+    .dark .berita-item { border-bottom-color: rgba(241,245,249,0.1); }
+
+    /* ===== DARK TOGGLE ===== */
+    .toggle-pill {
+      width: 52px; height: 28px;
+      background: #CBD5E1;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: none;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .toggle-pill.active { background: #D4AF37; }
+    .toggle-pill::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-pill.active::after { transform: translateX(24px); }
+
+    /* ===== FOOTER ===== */
+    .footer-bg {
+      background: #0A2540;
+    }
+    .dark .footer-bg { background: #020817; }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ===== MOBILE NAV ===== */
+    .mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .mobile-menu.open { max-height: 480px; }
+
+    /* ===== BADGE ===== */
+    .badge-kuota {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      background: rgba(220,38,38,0.1);
+      color: #DC2626;
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: 999px;
+      padding: 0.25rem 0.875rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+    .dark .badge-kuota {
+      background: rgba(220,38,38,0.15);
+      color: #FCA5A5;
+      border-color: rgba(220,38,38,0.3);
+    }
+
+    /* Noise texture overlay on hero */
+    .noise::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    /* Stat counter animation */
+    .stat-num {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900;
+      color: #D4AF37;
+      line-height: 1;
+    }
+
+    /* Horizontal scroll on mobile for program */
+    @media (max-width: 767px) {
+      .program-scroll-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 1rem;
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+      .program-track {
+        flex-direction: row;
+        width: max-content;
+        gap: 1.25rem;
+        align-items: flex-start;
+      }
+      .program-card {
+        width: 280px;
+        flex: none;
+        margin: 0;
+      }
+      .program-card:nth-child(2) { margin-top: 0; }
+      .program-card:nth-child(3) { margin-top: 0; }
+    }
+
+    /* Sambutan layout */
+    .sambutan-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    @media (min-width: 768px) {
+      .sambutan-wrap {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 4rem;
+      }
+      .sambutan-photo { flex: 0 0 42%; }
+      .sambutan-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    }
+
+    .blockquote-pull {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-style: italic;
+      font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+      line-height: 1.5;
+      color: #0A2540;
+      border-left: 4px solid #D4AF37;
+      padding-left: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .dark .blockquote-pull { color: #F1F5F9; }
+
+    /* Stat card backgrounds */
+    .stat-card-1 { background: #0A2540; }
+    .stat-card-2 { background: #0F3460; }
+    .stat-card-3 { background: #0A2540; }
+    .dark .stat-card-1 { background: #1E293B; }
+    .dark .stat-card-2 { background: #1E3A5F; }
+    .dark .stat-card-3 { background: #1E293B; }
+  </style>
+</head>
+
+<body class="font-body antialiased">
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav id="navbar" class="navbar-glass fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16 md:h-[72px]">
+
+        <!-- Logo -->
+        <a href="#home" class="flex items-center gap-3 flex-shrink-0">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #D4AF37;">
+            <i class="fa-solid fa-graduation-cap text-navy text-base"></i>
+          </div>
+          <div class="leading-tight">
+            <span class="font-heading font-800 text-sm text-navy dark:text-dark-text leading-none block" style="font-weight: 700; font-family:'Poppins',sans-serif;">SMAN ICN</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 leading-none block tracking-wide">Insan Cendekia Nusantara</span>
+          </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <ul class="hidden md:flex items-center gap-6 lg:gap-8 text-[0.85rem] font-medium text-navy dark:text-dark-text">
+          <li><a href="#program" class="gold-underline hover:text-gold transition-colors">Program</a></li>
+          <li><a href="#prestasi" class="gold-underline hover:text-gold transition-colors">Prestasi</a></li>
+          <li><a href="#fasilitas" class="gold-underline hover:text-gold transition-colors">Fasilitas</a></li>
+          <li><a href="#berita" class="gold-underline hover:text-gold transition-colors">Berita</a></li>
+        </ul>
+
+        <!-- Right Controls -->
+        <div class="flex items-center gap-3">
+          <!-- Dark Mode Toggle -->
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-sun text-slate-400 dark:text-slate-500 text-xs"></i>
+            <button id="darkToggle" class="toggle-pill" aria-label="Toggle dark mode" title="Toggle mode gelap"></button>
+            <i class="fa-solid fa-moon text-slate-400 dark:text-gold text-xs"></i>
+          </div>
+
+          <!-- PPDB Button -->
+          <a href="#ppdb" class="btn-gold text-sm hidden md:inline-flex" style="padding: 0.6rem 1.4rem; border-radius:0.6rem;">
+            <i class="fa-solid fa-pen-to-square"></i> PPDB
+          </a>
+
+          <!-- Mobile Hamburger -->
+          <button id="menuToggle" class="md:hidden w-10 h-10 flex flex-col justify-center items-center gap-[5px] rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Menu">
+            <span class="block w-5 h-[2px] bg-navy dark:bg-dark-text rounded transition-all" id="bar1"></span>
+            <span class="block w-5 h-[2px] bg-navy dark:bg-dark-text rounded transition-all" id="bar2"></span>
+            <span class="block w-5 h-[2px] bg-navy dark:bg-dark-text rounded transition-all" id="bar3"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobileMenu" class="mobile-menu md:hidden">
+        <div class="pb-4 flex flex-col gap-1 border-t border-slate-200 dark:border-slate-700 mt-1 pt-4">
+          <a href="#program" class="mobile-link block py-3 px-4 rounded-lg text-navy dark:text-dark-text hover:bg-gold/10 transition font-medium text-sm">Program Unggulan</a>
+          <a href="#prestasi" class="mobile-link block py-3 px-4 rounded-lg text-navy dark:text-dark-text hover:bg-gold/10 transition font-medium text-sm">Prestasi</a>
+          <a href="#fasilitas" class="mobile-link block py-3 px-4 rounded-lg text-navy dark:text-dark-text hover:bg-gold/10 transition font-medium text-sm">Fasilitas</a>
+          <a href="#kehidupan" class="mobile-link block py-3 px-4 rounded-lg text-navy dark:text-dark-text hover:bg-gold/10 transition font-medium text-sm">Kehidupan Siswa</a>
+          <a href="#berita" class="mobile-link block py-3 px-4 rounded-lg text-navy dark:text-dark-text hover:bg-gold/10 transition font-medium text-sm">Berita</a>
+          <a href="#ppdb" class="btn-gold mt-2 justify-center text-sm">
+            <i class="fa-solid fa-pen-to-square"></i> Daftar PPDB 2026/2027
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <section id="home" class="hero-bg noise relative min-h-screen flex items-center justify-center text-white overflow-hidden">
+    <!-- Decorative element -->
+    <div class="absolute top-0 right-0 w-72 h-72 rounded-full opacity-10" style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); transform: translate(30%, -30%);"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 rounded-full opacity-10" style="background: radial-gradient(circle, #D4AF37 0%, transparent 70%); transform: translate(-30%, 30%);"></div>
+
+    <div class="max-w-7xl mx-auto px-6 md:px-12 py-28 md:py-0 text-center md:text-left relative z-10 w-full">
+      <div class="max-w-3xl">
+        <!-- Label -->
+        <div class="flex items-center gap-3 mb-6 justify-center md:justify-start" style="animation: fadeUp 0.7s ease both; animation-delay: 0.1s;">
+          <span class="gold-line"></span>
+          <span class="section-label text-gold-light tracking-[0.22em] text-xs">SMA Negeri Insan Cendekia Nusantara</span>
+          <span class="gold-line"></span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="hero-title text-white mb-6" style="font-size: clamp(2.75rem, 7vw, 5.5rem); animation: fadeUp 0.7s ease both; animation-delay: 0.25s;">
+          Mencetak<br/>
+          <span style="color: #D4AF37;">Pemimpin</span><br/>
+          Masa Depan
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-slate-200 text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto md:mx-0 prose-constrain" style="animation: fadeUp 0.7s ease both; animation-delay: 0.4s;">
+          Pendidikan berbasis riset, karakter kuat, dan kepemimpinan autentik — membentuk generasi yang siap menghadapi tantangan global dengan berakar pada nilai Nusantara.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style="animation: fadeUp 0.7s ease both; animation-delay: 0.55s;">
+          <a href="#ppdb" class="btn-gold text-base">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Daftar Sekarang
+          </a>
+          <a href="#program" class="btn-outline-gold text-base text-white border-white/40 hover:bg-white/10">
+            <i class="fa-solid fa-compass"></i> Jelajahi Program
+          </a>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="flex flex-wrap gap-6 mt-14 justify-center md:justify-start" style="animation: fadeUp 0.7s ease both; animation-delay: 0.7s;">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-heading font-extrabold text-gold">1.200+</span>
+            <span class="text-slate-300 text-sm">Siswa Aktif</span>
+          </div>
+          <div class="w-px h-8 bg-white/20 hidden sm:block"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-heading font-extrabold text-gold">95%</span>
+            <span class="text-slate-300 text-sm">Masuk PTN</span>
+          </div>
+          <div class="w-px h-8 bg-white/20 hidden sm:block"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-heading font-extrabold text-gold">30+</span>
+            <span class="text-slate-300 text-sm">Penghargaan / Tahun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60" style="animation: fadeUp 0.7s ease both; animation-delay:0.9s;">
+      <span class="text-xs text-slate-300 tracking-widest uppercase">Gulir</span>
+      <div class="w-[1.5px] h-8 bg-slate-300 rounded-full" style="animation: scrollPulse 1.8s ease-in-out infinite;"></div>
+    </div>
+  </section>
+
+  <!-- ===================== SAMBUTAN ===================== -->
+  <section id="sambutan" class="py-20 md:py-28 bg-bg-light dark:bg-dark-bg">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="sambutan-wrap">
+
+        <!-- Photo Side -->
+        <div class="sambutan-photo reveal">
+          <div class="relative">
+            <!-- Decorative offset frame -->
+            <div class="absolute -top-4 -left-4 w-full h-full rounded-2xl border-2 border-gold/30 -z-0"></div>
+            <img
+              src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80&auto=format&fit=crop&crop=faces"
+              alt="Kepala Sekolah SMAN Insan Cendekia Nusantara"
+              class="relative z-10 w-full rounded-2xl object-cover shadow-2xl"
+              style="max-height: 520px; object-position: top;"
+            />
+            <!-- Name card overlay -->
+            <div class="absolute bottom-5 left-5 right-5 z-20 bg-white/90 dark:bg-dark-surface/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+              <p class="font-heading font-700 text-navy dark:text-dark-text text-base" style="font-weight:700; font-family:'Poppins',sans-serif;">Dr. H. Ahmad Fauzan, M.Pd.</p>
+              <p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Kepala SMA Negeri Insan Cendekia Nusantara</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Side -->
+        <div class="sambutan-content reveal reveal-delay-1">
+          <span class="section-label">Sambutan Kepala Sekolah</span>
+          <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3 mb-4" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); line-height:1.15; font-family:'Poppins',sans-serif;">
+            Mendidik Bukan Sekadar Mengajar —<br/><span class="text-gold">Membentuk Jiwa</span>
+          </h2>
+
+          <blockquote class="blockquote-pull">
+            "Kami percaya setiap murid membawa potensi luar biasa. Tugas kami adalah menyalakan cahaya itu, bukan mengisinya dari nol."
+          </blockquote>
+
+          <div class="prose-constrain space-y-4 text-slate-600 dark:text-slate-300 text-[0.97rem] leading-relaxed">
+            <p>
+              Selamat datang di SMA Negeri Insan Cendekia Nusantara — ruang tempat mimpi bertemu dengan kerja keras. Selama lebih dari dua dekade, kami telah meluluskan ribuan alumni yang kini berkontribusi di berbagai bidang: ilmu pengetahuan, hukum, seni, hingga kepemimpinan nasional.
+            </p>
+            <p>
+              Kami berkomitmen untuk terus berinovasi dalam metode pembelajaran, membangun lingkungan yang aman dan menginspirasi, serta mempersiapkan setiap siswa menjadi pemimpin yang berintegritas di era global.
+            </p>
+          </div>
+
+          <div class="mt-8 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+              <i class="fa-solid fa-star text-gold"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-navy dark:text-dark-text">Akreditasi A (Unggul)</p>
+              <p class="text-xs text-slate-400">BAN-S/M · 2023</p>
+            </div>
+            <div class="w-px h-10 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+            <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+              <i class="fa-solid fa-award text-gold"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-navy dark:text-dark-text">Sekolah Riset Nasional</p>
+              <p class="text-xs text-slate-400">Kemdikbud · 2022</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROGRAM ===================== -->
+  <section id="program" class="py-20 md:py-28 bg-white dark:bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <!-- Header -->
+      <div class="text-center mb-14 reveal">
+        <span class="section-label">Program Unggulan</span>
+        <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); font-family:'Poppins',sans-serif;">
+          Tiga Jalur Keunggulan
+        </h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-3 max-w-2xl mx-auto text-sm md:text-base">
+          Setiap program dirancang dengan kurikulum mendalam, mentor berpengalaman, dan ekosistem belajar yang mendukung tumbuhnya potensi terbaik.
+        </p>
+      </div>
+
+      <!-- Cards — horizontal scroll on mobile, staggered on desktop -->
+      <div class="program-scroll-wrap">
+        <div class="program-track">
+
+          <!-- STEM -->
+          <div class="program-card reveal">
+            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-5">
+              <i class="fa-solid fa-flask-vial text-2xl" style="color: #2563EB;"></i>
+            </div>
+            <h3 class="font-heading font-bold text-navy dark:text-dark-text text-xl mb-3" style="font-family:'Poppins',sans-serif;">Program STEM</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-5">
+              Matematika, sains, teknologi, dan rekayasa terintegrasi. Siswa mengerjakan proyek riset nyata bersama mitra universitas dan industri teknologi nasional.
+            </p>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Lab Fisika & Kimia Berstandar Nasional</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Kelas Coding & Data Science</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Olimpiade Sains Nasional (OSN)</li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
+              <span class="text-xs text-gold font-semibold tracking-wide">PEMINATAN IPA · IPA+</span>
+            </div>
+          </div>
+
+          <!-- Humanities -->
+          <div class="program-card reveal reveal-delay-1">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center mb-5">
+              <i class="fa-solid fa-feather-pointed text-2xl" style="color: #D97706;"></i>
+            </div>
+            <h3 class="font-heading font-bold text-navy dark:text-dark-text text-xl mb-3" style="font-family:'Poppins',sans-serif;">Program Humaniora</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-5">
+              Bahasa, sosial, ekonomi, dan seni budaya. Mendidik siswa untuk berpikir kritis, berkomunikasi dengan jernih, dan memahami kompleksitas peradaban.
+            </p>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Debat Nasional & Model PBB</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Jurnalisme & Penulisan Kreatif</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Studi Sosial Lintas Disiplin</li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
+              <span class="text-xs text-gold font-semibold tracking-wide">PEMINATAN IPS · BAHASA</span>
+            </div>
+          </div>
+
+          <!-- Leadership -->
+          <div class="program-card reveal reveal-delay-2">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-5">
+              <i class="fa-solid fa-people-group text-2xl" style="color: #059669;"></i>
+            </div>
+            <h3 class="font-heading font-bold text-navy dark:text-dark-text text-xl mb-3" style="font-family:'Poppins',sans-serif;">Program Kepemimpinan</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-5">
+              Karakter, etika, dan kepemimpinan transformatif. Melalui proyek sosial nyata, pengabdian masyarakat, dan mentoring pemimpin muda Indonesia.
+            </p>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Proyek Sosial Komunitas</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Leadership Camp Tahunan</li>
+              <li class="flex items-center gap-2"><i class="fa-solid fa-check text-gold text-xs"></i> Mentoring Pemimpin Alumni</li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700">
+              <span class="text-xs text-gold font-semibold tracking-wide">LINTAS PEMINATAN</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRESTASI ===================== -->
+  <section id="prestasi" class="py-20 md:py-28 bg-bg-light dark:bg-dark-bg overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="text-center mb-14 reveal">
+        <span class="section-label">Pencapaian Kami</span>
+        <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); font-family:'Poppins',sans-serif;">
+          Prestasi yang Berbicara
+        </h2>
+      </div>
+
+      <!-- Staggered Stat Grid -->
+      <div class="prestasi-grid mb-16">
+
+        <!-- Kolom 1 — Besar -->
+        <div class="stat-card-1 rounded-2xl p-8 md:p-10 text-white reveal" style="min-height: 280px;">
+          <div class="flex items-start justify-between mb-4">
+            <i class="fa-solid fa-medal text-gold text-3xl"></i>
+            <span class="text-xs text-gold/70 font-semibold tracking-wider uppercase">OSN Nasional</span>
+          </div>
+          <p class="stat-num mb-2" style="font-size: clamp(4.5rem, 10vw, 7rem);">15</p>
+          <p class="text-gold font-heading font-semibold text-xl mb-1" style="font-family:'Poppins',sans-serif;">Medali Emas</p>
+          <p class="text-slate-300 text-sm leading-relaxed mt-2">Olimpiade Sains Nasional dalam 3 tahun terakhir — Matematika, Fisika, Kimia, Biologi, dan Informatika.</p>
+          <div class="mt-6 flex gap-4">
+            <div><p class="text-2xl font-heading font-bold text-gold" style="font-family:'Poppins',sans-serif;">8</p><p class="text-xs text-slate-400">Perak</p></div>
+            <div><p class="text-2xl font-heading font-bold text-gold" style="font-family:'Poppins',sans-serif;">12</p><p class="text-xs text-slate-400">Perunggu</p></div>
+          </div>
+        </div>
+
+        <!-- Kolom 2 — Sedang -->
+        <div class="stat-card-2 rounded-2xl p-7 md:p-9 text-white reveal reveal-delay-1" style="min-height: 230px;">
+          <div class="flex items-start justify-between mb-4">
+            <i class="fa-solid fa-comments text-gold text-2xl"></i>
+            <span class="text-xs text-gold/70 font-semibold tracking-wider uppercase">Debat</span>
+          </div>
+          <p class="stat-num mb-1" style="font-size: clamp(3.5rem, 7vw, 5rem);">7×</p>
+          <p class="text-gold font-heading font-semibold text-lg mb-1" style="font-family:'Poppins',sans-serif;">Juara Nasional</p>
+          <p class="text-slate-300 text-sm leading-relaxed mt-2">Kompetisi debat berbahasa Indonesia dan Inggris tingkat nasional sejak 2017.</p>
+        </div>
+
+        <!-- Kolom 3 — Kecil -->
+        <div class="stat-card-3 rounded-2xl p-6 md:p-8 text-white reveal reveal-delay-2" style="min-height: 200px;">
+          <div class="flex items-start justify-between mb-4">
+            <i class="fa-solid fa-microscope text-gold text-2xl"></i>
+            <span class="text-xs text-gold/70 font-semibold tracking-wider uppercase">Riset</span>
+          </div>
+          <p class="stat-num mb-1" style="font-size: clamp(2.75rem, 6vw, 4rem);">42</p>
+          <p class="text-gold font-heading font-semibold mb-1" style="font-family:'Poppins',sans-serif;">Karya Riset</p>
+          <p class="text-slate-300 text-xs leading-relaxed mt-2">Dipublikasikan di jurnal nasional & internasional.</p>
+        </div>
+
+      </div>
+
+      <!-- Awards strip -->
+      <div class="reveal">
+        <div class="flex flex-wrap gap-3 justify-center">
+          <div class="flex items-center gap-2 bg-white dark:bg-dark-surface rounded-full px-4 py-2 shadow text-xs font-medium text-navy dark:text-dark-text border border-slate-100 dark:border-slate-700">
+            <i class="fa-solid fa-trophy text-gold"></i> Juara 1 LKS Nasional 2024
+          </div>
+          <div class="flex items-center gap-2 bg-white dark:bg-dark-surface rounded-full px-4 py-2 shadow text-xs font-medium text-navy dark:text-dark-text border border-slate-100 dark:border-slate-700">
+            <i class="fa-solid fa-globe text-gold"></i> ISEF Finalist 2023
+          </div>
+          <div class="flex items-center gap-2 bg-white dark:bg-dark-surface rounded-full px-4 py-2 shadow text-xs font-medium text-navy dark:text-dark-text border border-slate-100 dark:border-slate-700">
+            <i class="fa-solid fa-book-open text-gold"></i> Sekolah Literasi Terbaik 2023
+          </div>
+          <div class="flex items-center gap-2 bg-white dark:bg-dark-surface rounded-full px-4 py-2 shadow text-xs font-medium text-navy dark:text-dark-text border border-slate-100 dark:border-slate-700">
+            <i class="fa-solid fa-flag text-gold"></i> 3× Sekolah Adiwiyata Nasional
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== FASILITAS ===================== -->
+  <section id="fasilitas" class="py-20 md:py-28 bg-white dark:bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="text-center mb-14 reveal">
+        <span class="section-label">Infrastruktur Belajar</span>
+        <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); font-family:'Poppins',sans-serif;">
+          Fasilitas Berstandar Tinggi
+        </h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto text-sm">Ruang belajar yang dirancang untuk mendorong eksplorasi, kolaborasi, dan kreativitas tanpa batas.</p>
+      </div>
+
+      <!-- Stacked + side by side -->
+      <div class="flex flex-col gap-5 md:flex-row md:gap-5">
+
+        <!-- Big card left -->
+        <div class="fasilitas-card flex-1 md:flex-[1.4] reveal" style="min-height: 380px;">
+          <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=900&q=80&auto=format&fit=crop" alt="Laboratorium STEM" />
+          <div class="fasilitas-overlay"></div>
+          <div class="absolute bottom-6 left-6 right-6 z-10 text-white">
+            <p class="text-xs text-gold tracking-wider uppercase font-semibold mb-1">Riset & Eksperimen</p>
+            <h3 class="font-heading font-bold text-xl" style="font-family:'Poppins',sans-serif;">Laboratorium STEM Terpadu</h3>
+            <p class="text-slate-300 text-sm mt-1">5 lab berstandar tinggi — Fisika, Kimia, Biologi, Komputer, dan Robotika.</p>
+          </div>
+        </div>
+
+        <!-- Right column — 2 stacked -->
+        <div class="flex flex-col gap-5 flex-1 reveal reveal-delay-1">
+          <div class="fasilitas-card" style="min-height: 180px; flex: 1;">
+            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=700&q=80&auto=format&fit=crop" alt="Perpustakaan" />
+            <div class="fasilitas-overlay"></div>
+            <div class="absolute bottom-4 left-5 right-5 z-10 text-white">
+              <p class="text-xs text-gold tracking-wider uppercase font-semibold mb-0.5">Koleksi 50.000+ Buku</p>
+              <h3 class="font-heading font-bold text-base" style="font-family:'Poppins',sans-serif;">Perpustakaan Riset Digital</h3>
+            </div>
+          </div>
+          <div class="fasilitas-card" style="min-height: 180px; flex: 1;">
+            <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=700&q=80&auto=format&fit=crop" alt="Studio Seni" />
+            <div class="fasilitas-overlay"></div>
+            <div class="absolute bottom-4 left-5 right-5 z-10 text-white">
+              <p class="text-xs text-gold tracking-wider uppercase font-semibold mb-0.5">Ekspresi & Kreasi</p>
+              <h3 class="font-heading font-bold text-base" style="font-family:'Poppins',sans-serif;">Studio Seni & Media</h3>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- More facilities -->
+      <div class="mt-5 flex flex-col sm:flex-row gap-5 reveal reveal-delay-2">
+        <div class="flex-1 bg-bg-light dark:bg-dark-bg rounded-2xl p-6 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-futbol text-gold text-xl"></i>
+          </div>
+          <div>
+            <p class="font-heading font-semibold text-navy dark:text-dark-text" style="font-family:'Poppins',sans-serif;">Lapangan Olahraga</p>
+            <p class="text-slate-400 text-xs mt-0.5">Basket, Futsal, Badminton, Voli, dan trek lari 400m</p>
+          </div>
+        </div>
+        <div class="flex-1 bg-bg-light dark:bg-dark-bg rounded-2xl p-6 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-utensils text-gold text-xl"></i>
+          </div>
+          <div>
+            <p class="font-heading font-semibold text-navy dark:text-dark-text" style="font-family:'Poppins',sans-serif;">Kantin Sehat</p>
+            <p class="text-slate-400 text-xs mt-0.5">Menu bergizi terstandar, bebas junk food</p>
+          </div>
+        </div>
+        <div class="flex-1 bg-bg-light dark:bg-dark-bg rounded-2xl p-6 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-wifi text-gold text-xl"></i>
+          </div>
+          <div>
+            <p class="font-heading font-semibold text-navy dark:text-dark-text" style="font-family:'Poppins',sans-serif;">Konektivitas Penuh</p>
+            <p class="text-slate-400 text-xs mt-0.5">WiFi 1 Gbps di seluruh area kampus</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== KEHIDUPAN SISWA ===================== -->
+  <section id="kehidupan" class="py-20 md:py-28 bg-bg-light dark:bg-dark-bg">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-4 reveal">
+        <div>
+          <span class="section-label">Kehidupan Kampus</span>
+          <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); font-family:'Poppins',sans-serif;">
+            Belajar. Bertumbuh. Bersama.
+          </h2>
+        </div>
+        <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xs">Lebih dari 40 ekstrakurikuler, komunitas riset, dan program pertukaran pelajar internasional.</p>
+      </div>
+
+      <!-- Asymmetric Gallery -->
+      <div class="gallery-asymmetric reveal">
+        <div class="g-big">
+          <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=80&auto=format&fit=crop" alt="Siswa berdiskusi" style="height:100%; object-fit:cover;" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=500&q=80&auto=format&fit=crop" alt="Kelas sains" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=500&q=80&auto=format&fit=crop" alt="Kompetisi" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=500&q=80&auto=format&fit=crop" alt="Membaca perpustakaan" />
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=500&q=80&auto=format&fit=crop" alt="Ekskul seni" />
+        </div>
+      </div>
+
+      <!-- Clubs row -->
+      <div class="mt-8 flex flex-wrap gap-2 justify-center reveal">
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Robotika</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Debat</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Jurnalistik</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Paduan Suara</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Paskibra</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Film & Fotografi</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">Teater</span>
+        <span class="bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-navy dark:text-dark-text rounded-full px-4 py-1.5 text-xs font-medium">KIR</span>
+        <span class="bg-gold/15 border border-gold/30 text-gold rounded-full px-4 py-1.5 text-xs font-semibold">+35 Lainnya</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TESTIMONI ===================== -->
+  <section id="testimoni" class="py-20 md:py-28 bg-white dark:bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="text-center mb-14 reveal">
+        <span class="section-label">Mereka Berkata</span>
+        <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.7rem, 3.5vw, 2.6rem); font-family:'Poppins',sans-serif;">
+          Suara Orang Tua &amp; Alumni
+        </h2>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+
+        <!-- Testimoni 1 — Orang Tua -->
+        <div class="testi-card flex-1 reveal">
+          <div class="flex items-center gap-1 mb-4">
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+          </div>
+          <i class="fa-solid fa-quote-left text-gold/30 text-4xl mb-2 block"></i>
+          <p class="text-navy dark:text-dark-text text-[0.97rem] leading-relaxed italic mb-6 prose-constrain">
+            Saya menyaksikan sendiri transformasi anak saya. Masuk dengan rasa minder, keluar dengan percaya diri dan berani bermimpi besar. ICN bukan sekadar sekolah — ia adalah rumah kedua yang membentuk karakter.
+          </p>
+          <div class="flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80&auto=format&fit=crop&crop=faces" alt="Ibu Ratna" class="w-11 h-11 rounded-full object-cover" />
+            <div>
+              <p class="font-semibold text-navy dark:text-dark-text text-sm" style="font-family:'Poppins',sans-serif;">Ibu Ratna Kumalasari</p>
+              <p class="text-slate-400 text-xs">Orang tua siswa angkatan 2023</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimoni 2 — Alumni -->
+        <div class="testi-card flex-1 reveal reveal-delay-1">
+          <div class="flex items-center gap-1 mb-4">
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+            <i class="fa-solid fa-star text-gold text-sm"></i>
+          </div>
+          <i class="fa-solid fa-quote-left text-gold/30 text-4xl mb-2 block"></i>
+          <p class="text-navy dark:text-dark-text text-[0.97rem] leading-relaxed italic mb-6 prose-constrain">
+            Program riset di ICN mengajarkan saya berpikir seperti ilmuwan sejak SMA. Kini saya menjalani studi doktoral di Universitas Tokyo, dan fondasi yang saya bangun di sini tidak ternilai harganya.
+          </p>
+          <div class="flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80&auto=format&fit=crop&crop=faces" alt="Budi Santoso" class="w-11 h-11 rounded-full object-cover" />
+            <div>
+              <p class="font-semibold text-navy dark:text-dark-text text-sm" style="font-family:'Poppins',sans-serif;">Budi Santoso, S.Si., M.Sc.</p>
+              <p class="text-slate-400 text-xs">Alumni 2018 · PhD Candidate, Univ. Tokyo</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BERITA ===================== -->
+  <section id="berita" class="py-20 md:py-28 bg-bg-light dark:bg-dark-bg">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-10 gap-3 reveal">
+        <div>
+          <span class="section-label">Berita & Pengumuman</span>
+          <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mt-3" style="font-size:clamp(1.6rem, 3vw, 2.3rem); font-family:'Poppins',sans-serif;">
+            Terkini dari ICN
+          </h2>
+        </div>
+        <a href="#" class="text-gold hover:text-gold-light font-semibold text-sm flex items-center gap-1.5 transition-colors">
+          Semua Berita <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+
+      <div class="reveal">
+        <div class="berita-item">
+          <div class="flex-shrink-0 text-center min-w-[52px]">
+            <p class="text-gold font-bold font-heading text-lg leading-none" style="font-family:'Poppins',sans-serif;">24</p>
+            <p class="text-slate-400 text-xs uppercase tracking-wide">Mei '25</p>
+          </div>
+          <div>
+            <span class="text-xs text-white bg-navy dark:bg-gold dark:text-navy rounded-full px-2.5 py-0.5 font-semibold">Prestasi</span>
+            <h3 class="font-heading font-semibold text-navy dark:text-dark-text mt-1.5 text-[0.97rem] hover:text-gold transition-colors cursor-pointer" style="font-family:'Poppins',sans-serif;">Tim Robotika ICN Raih Juara I Kompetisi Nasional GEMASTIK 2025</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Untuk ketiga kalinya berturut-turut, tim robotika kami mencetak prestasi membanggakan di tingkat nasional...</p>
+          </div>
+        </div>
+        <div class="berita-item">
+          <div class="flex-shrink-0 text-center min-w-[52px]">
+            <p class="text-gold font-bold font-heading text-lg leading-none" style="font-family:'Poppins',sans-serif;">15</p>
+            <p class="text-slate-400 text-xs uppercase tracking-wide">Mei '25</p>
+          </div>
+          <div>
+            <span class="text-xs text-white bg-emerald-600 rounded-full px-2.5 py-0.5 font-semibold">Pengumuman</span>
+            <h3 class="font-heading font-semibold text-navy dark:text-dark-text mt-1.5 text-[0.97rem] hover:text-gold transition-colors cursor-pointer" style="font-family:'Poppins',sans-serif;">Pembukaan Pendaftaran PPDB 2026/2027 Jalur Prestasi</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Pendaftaran jalur prestasi resmi dibuka mulai 1 Juni 2025. Kuota terbatas 60 siswa dengan 3 jalur seleksi...</p>
+          </div>
+        </div>
+        <div class="berita-item">
+          <div class="flex-shrink-0 text-center min-w-[52px]">
+            <p class="text-gold font-bold font-heading text-lg leading-none" style="font-family:'Poppins',sans-serif;">08</p>
+            <p class="text-slate-400 text-xs uppercase tracking-wide">Mei '25</p>
+          </div>
+          <div>
+            <span class="text-xs text-white bg-blue-600 rounded-full px-2.5 py-0.5 font-semibold">Akademik</span>
+            <h3 class="font-heading font-semibold text-navy dark:text-dark-text mt-1.5 text-[0.97rem] hover:text-gold transition-colors cursor-pointer" style="font-family:'Poppins',sans-serif;">ICN Tandatangani MoU Kerja Sama Riset dengan UI dan ITB</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Memorandum of Understanding ini membuka akses lab dan pembimbingan riset langsung dari dosen kedua universitas...</p>
+          </div>
+        </div>
+        <div class="berita-item">
+          <div class="flex-shrink-0 text-center min-w-[52px]">
+            <p class="text-gold font-bold font-heading text-lg leading-none" style="font-family:'Poppins',sans-serif;">02</p>
+            <p class="text-slate-400 text-xs uppercase tracking-wide">Mei '25</p>
+          </div>
+          <div>
+            <span class="text-xs text-white bg-purple-600 rounded-full px-2.5 py-0.5 font-semibold">Kegiatan</span>
+            <h3 class="font-heading font-semibold text-navy dark:text-dark-text mt-1.5 text-[0.97rem] hover:text-gold transition-colors cursor-pointer" style="font-family:'Poppins',sans-serif;">ICN Leadership Summit 2025: Membangun Pemimpin Berkarakter</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Lebih dari 300 siswa mengikuti summit kepemimpinan tahunan dengan pembicara dari berbagai bidang...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PPDB ===================== -->
+  <section id="ppdb" class="py-20 md:py-28 bg-white dark:bg-dark-surface">
+    <div class="max-w-4xl mx-auto px-6 md:px-12">
+      <div class="ppdb-card reveal">
+        <div class="p-8 md:p-12">
+          <!-- Top badges -->
+          <div class="flex flex-wrap items-center gap-3 mb-6">
+            <span class="badge-kuota">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block animate-pulse"></span>
+              Kuota Terbatas — 120 Kursi
+            </span>
+            <span class="text-xs text-gold font-semibold bg-gold/10 border border-gold/20 rounded-full px-3 py-1">TA 2026/2027</span>
+          </div>
+
+          <h2 class="font-heading font-extrabold text-navy dark:text-dark-text mb-3" style="font-size: clamp(2rem, 4.5vw, 3rem); line-height: 1.1; font-family:'Poppins',sans-serif;">
+            Pendaftaran <span class="text-gold">2026/2027</span><br/>Resmi Dibuka
+          </h2>
+
+          <p class="text-slate-600 dark:text-slate-300 text-base leading-relaxed mb-8 prose-constrain">
+            Bergabunglah bersama komunitas pelajar terbaik Indonesia. SMA Negeri Insan Cendekia Nusantara membuka pintu bagi siswa-siswa berprestasi yang siap menjalani proses pendidikan berkualitas, menantang, dan bermakna.
+          </p>
+
+          <!-- Timeline PPDB -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-bg-light dark:bg-dark-bg rounded-xl p-4 border border-slate-100 dark:border-slate-700">
+              <p class="text-xs text-gold font-semibold uppercase tracking-wide mb-1">Gelombang I</p>
+              <p class="font-heading font-bold text-navy dark:text-dark-text text-sm" style="font-family:'Poppins',sans-serif;">1 – 30 Juni 2025</p>
+              <p class="text-xs text-slate-400 mt-0.5">Jalur Prestasi Akademik</p>
+            </div>
+            <div class="bg-bg-light dark:bg-dark-bg rounded-xl p-4 border border-slate-100 dark:border-slate-700">
+              <p class="text-xs text-gold font-semibold uppercase tracking-wide mb-1">Gelombang II</p>
+              <p class="font-heading font-bold text-navy dark:text-dark-text text-sm" style="font-family:'Poppins',sans-serif;">1 – 31 Juli 2025</p>
+              <p class="text-xs text-slate-400 mt-0.5">Jalur Reguler & Zonasi</p>
+            </div>
+            <div class="bg-bg-light dark:bg-dark-bg rounded-xl p-4 border border-gold/30 bg-gold/5">
+              <p class="text-xs text-gold font-semibold uppercase tracking-wide mb-1">Pengumuman</p>
+              <p class="font-heading font-bold text-navy dark:text-dark-text text-sm" style="font-family:'Poppins',sans-serif;">15 Agustus 2025</p>
+              <p class="text-xs text-slate-400 mt-0.5">Hasil seleksi final</p>
+            </div>
+          </div>
+
+          <!-- Requirements -->
+          <div class="flex flex-wrap gap-x-6 gap-y-2 mb-8 text-sm text-slate-600 dark:text-slate-300">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-gold text-xs"></i> Lulusan SMP/MTs 2025</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-gold text-xs"></i> Nilai rata-rata ≥ 80</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-gold text-xs"></i> Bebas biaya pendaftaran</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-gold text-xs"></i> Beasiswa tersedia</span>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="#" class="btn-gold text-base justify-center">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i> Daftar Sekarang
+            </a>
+            <a href="#" class="btn-outline-gold text-base justify-center">
+              <i class="fa-solid fa-file-lines"></i> Unduh Panduan PPDB
+            </a>
+          </div>
+
+          <!-- Contact PPDB -->
+          <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-phone text-gold text-xs"></i> (021) 7891-2345</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-envelope text-gold text-xs"></i> ppdb@smanicn.sch.id</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-clock text-gold text-xs"></i> Sen–Jum, 08:00–15:00 WIB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer-bg text-white">
+    <div class="max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-8">
+      <div class="flex flex-col md:flex-row gap-12 md:gap-16 pb-10 border-b border-white/10">
+
+        <!-- Brand -->
+        <div class="md:w-72 flex-shrink-0">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #D4AF37;">
+              <i class="fa-solid fa-graduation-cap text-navy text-base"></i>
+            </div>
+            <div>
+              <p class="font-heading font-bold text-white leading-tight" style="font-family:'Poppins',sans-serif;">SMA Negeri Insan</p>
+              <p class="font-heading font-bold text-gold leading-tight text-sm" style="font-family:'Poppins',sans-serif;">Cendekia Nusantara</p>
+            </div>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed mb-5">
+            Mendidik, menginspirasi, dan menggerakkan generasi terbaik Indonesia untuk memimpin dengan integritas dan kecerdasan.
+          </p>
+          <!-- Social -->
+          <div class="flex gap-3">
+            <a href="#" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-gold/20 flex items-center justify-center transition" aria-label="Instagram">
+              <i class="fa-brands fa-instagram text-sm"></i>
+            </a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-gold/20 flex items-center justify-center transition" aria-label="YouTube">
+              <i class="fa-brands fa-youtube text-sm"></i>
+            </a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-gold/20 flex items-center justify-center transition" aria-label="Twitter">
+              <i class="fa-brands fa-x-twitter text-sm"></i>
+            </a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-gold/20 flex items-center justify-center transition" aria-label="LinkedIn">
+              <i class="fa-brands fa-linkedin-in text-sm"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="flex flex-wrap gap-10 md:gap-14 flex-1">
+          <div>
+            <p class="text-gold font-semibold text-xs tracking-widest uppercase mb-4">Sekolah</p>
+            <ul class="space-y-2.5 text-sm text-slate-400">
+              <li><a href="#sambutan" class="hover:text-white transition">Tentang ICN</a></li>
+              <li><a href="#program" class="hover:text-white transition">Program Unggulan</a></li>
+              <li><a href="#fasilitas" class="hover:text-white transition">Fasilitas</a></li>
+              <li><a href="#prestasi" class="hover:text-white transition">Prestasi</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="text-gold font-semibold text-xs tracking-widest uppercase mb-4">Informasi</p>
+            <ul class="space-y-2.5 text-sm text-slate-400">
+              <li><a href="#berita" class="hover:text-white transition">Berita</a></li>
+              <li><a href="#ppdb" class="hover:text-white transition">PPDB 2026/2027</a></li>
+              <li><a href="#" class="hover:text-white transition">Kalender Akademik</a></li>
+              <li><a href="#" class="hover:text-white transition">Buku Tamu</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="text-gold font-semibold text-xs tracking-widest uppercase mb-4">Kontak</p>
+            <ul class="space-y-2.5 text-sm text-slate-400">
+              <li class="flex gap-2 items-start">
+                <i class="fa-solid fa-location-dot text-gold mt-0.5 flex-shrink-0 text-xs"></i>
+                <span>Jl. Insan Cendekia No. 7,<br/>Kebayoran Baru, Jakarta Selatan 12110</span>
+              </li>
+              <li class="flex gap-2 items-center">
+                <i class="fa-solid fa-phone text-gold text-xs"></i>
+                <a href="tel:+622178912345" class="hover:text-white transition">(021) 7891-2345</a>
+              </li>
+              <li class="flex gap-2 items-center">
+                <i class="fa-solid fa-envelope text-gold text-xs"></i>
+                <a href="mailto:info@smanicn.sch.id" class="hover:text-white transition">info@smanicn.sch.id</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="pt-7 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <p>&copy; 2025 SMA Negeri Insan Cendekia Nusantara. Hak cipta dilindungi.</p>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-slate-300 transition">Kebijakan Privasi</a>
+          <a href="#" class="hover:text-slate-300 transition">Ketentuan Penggunaan</a>
+          <a href="#" class="hover:text-slate-300 transition">Peta Situs</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <style>
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.6; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.3); }
+    }
+  </style>
+
+  <script>
+    // ===== DARK MODE =====
+    const html = document.documentElement;
+    const toggle = document.getElementById('darkToggle');
+
+    function applyDark(isDark) {
+      if (isDark) {
+        html.classList.add('dark');
+        toggle.classList.add('active');
+      } else {
+        html.classList.remove('dark');
+        toggle.classList.remove('active');
+      }
+    }
+
+    // Initial: localStorage > system
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark') {
+      applyDark(true);
+    } else if (stored === 'light') {
+      applyDark(false);
+    } else {
+      applyDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+
+    toggle.addEventListener('click', () => {
+      const isDark = html.classList.contains('dark');
+      applyDark(!isDark);
+      localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+    });
+
+    // ===== MOBILE MENU =====
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+    const bar3 = document.getElementById('bar3');
+    let menuOpen = false;
+
+    menuToggle.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('open', menuOpen);
+      bar1.style.transform = menuOpen ? 'rotate(45deg) translate(5px, 5px)' : '';
+      bar2.style.opacity = menuOpen ? '0' : '1';
+      bar3.style.transform = menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : '';
+    });
+
+    // Close on mobile link click
+    document.querySelectorAll('.mobile-link, #mobileMenu a').forEach(link => {
+      link.addEventListener('click', () => {
+        menuOpen = false;
+        mobileMenu.classList.remove('open');
+        bar1.style.transform = '';
+        bar2.style.opacity = '1';
+        bar3.style.transform = '';
+      });
+    });
+
+    // ===== SCROLL REVEAL =====
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ===== NAVBAR SHADOW ON SCROLL =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        navbar.style.boxShadow = '0 4px 32px rgba(10,37,64,0.10)';
+      } else {
+        navbar.style.boxShadow = 'none';
+      }
+    }, { passive: true });
+  </script>
+
+</body>
+</html>
