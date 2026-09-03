@@ -1,0 +1,17 @@
+[package]
+name = "chess_engine"          # Nama proyek
+version = "0.1.0"              # Versi awal
+edition = "2021"               # Menggunakan Rust Edition 2021
+
+[[bin]]
+name = "chess_engine"          # Nama binary output
+path = "src/main.rs"           # File sumber utama
+
+[profile.release]
+opt-level = 3                  # Optimasi maksimal (kecepatan tinggi)
+lto = true                     # Link-Time Optimization untuk performa lebih baik
+codegen-units = 1              # Satu unit kode untuk optimasi agresif
+panic = "unwind"               # Panic bisa ditangkap (tidak langsung abort)
+
+[profile.dev]
+opt-level = 1                  # Optimasi ringan untuk kompilasi cepat saat development
