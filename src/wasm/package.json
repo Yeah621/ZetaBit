@@ -1,0 +1,16 @@
+{
+  "name": "rules-wasm",
+  "type": "module",
+  "description": "Chess rules (shakmaty) compiled to WASM for client-side legal-move generation. Also a plain rlib so the Axum backend can reuse it later without duplicating this wrapper.",
+  "version": "0.1.0",
+  "files": [
+    "rules_wasm_bg.wasm",
+    "rules_wasm.js",
+    "rules_wasm.d.ts"
+  ],
+  "main": "rules_wasm.js",
+  "types": "rules_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
