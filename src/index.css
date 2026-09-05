@@ -1,23 +1,30 @@
 @import "tailwindcss";
 
 /**
- * Design tokens - Fase 2 (see chess-app-master-prompt.md bagian 4).
- * Dark-first, low-stimulus. Accent is a brighter derivative of the
- * board's own dark-square green (#769656) so the UI and the board read
- * as one identity without literally reusing the board's exact color
- * (that stays reserved for the board itself).
+ * Design tokens - Fase 2, v2 (revised after feedback: dark but more
+ * colorful/lively, soft-pastel direction rather than the original
+ * single-muted-green take on "dark-first" from the master prompt).
+ * Base is a deep plum-charcoal (not flat black) so it has some warmth
+ * of its own; three soft pastels give the three home-screen modes each
+ * their own gentle identity instead of one single accent everywhere.
+ * The board's own colors (chessground-theme.css) are untouched on
+ * purpose - it stays the one grounded, unchanging element in the app.
  */
 @theme {
-  --color-bg-base: #161512;
-  --color-bg-raised: #1e1c17;
-  --color-bg-sunken: #100f0d;
-  --color-border: #2c2a24;
+  --color-bg-base: #1a1721;
+  --color-bg-raised: #252030;
+  --color-bg-sunken: #100e15;
+  --color-border: #362f42;
 
-  --color-accent: #8fbf67;
-  --color-accent-dim: #5f7a49;
+  --color-accent: #c9b6f2;
+  --color-accent-dim: #8a7aa8;
 
-  --color-text-primary: #ece7dc;
-  --color-text-secondary: #948e80;
+  --color-lavender: #c9b6f2;
+  --color-peach: #f6c2a0;
+  --color-mint: #a3e8c4;
+
+  --color-text-primary: #f1ecf7;
+  --color-text-secondary: #a79fb8;
 
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
@@ -35,11 +42,10 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Restrained glassmorphism per bagian 4 - thin translucency + soft
-   gradient border + soft shadow, NOT heavy blur. Reserved for the
-   player/turn card and (later) the Play Setup modal - never the board
-   or main chrome. Apply as a class rather than baking it into every
-   card, so it stays the deliberate exception it's meant to be. */
+/* Restrained glassmorphism per master-prompt bagian 4 - thin
+   translucency + soft gradient border + soft shadow, NOT heavy blur.
+   Reserved for the player/turn card and (later) the Play Setup modal -
+   never the board or main chrome. */
 .glass-panel {
   background: linear-gradient(
     160deg,
@@ -47,6 +53,29 @@ body {
     color-mix(in srgb, var(--color-bg-raised) 30%, transparent)
   );
   backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
   box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Each bento card gets a soft gradient wash of its own pastel (set via
+   the --card-accent custom property on the element, see BentoCard.tsx)
+   instead of one flat charcoal fill everywhere - this is the main
+   "more alive" change from the first pass. */
+.bento-card {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--card-accent, var(--color-accent)) 16%, var(--color-bg-raised)),
+    var(--color-bg-raised) 65%
+  );
+  border: 1px solid var(--color-border);
+  transition:
+    border-color 200ms ease-out,
+    transform 150ms ease-out;
+}
+.bento-card.is-active:hover {
+  border-color: color-mix(in srgb, var(--card-accent, var(--color-accent)) 50%, var(--color-border));
+}
+.bento-icon {
+  background: color-mix(in srgb, var(--card-accent, var(--color-accent)) 22%, transparent);
+  color: var(--card-accent, var(--color-accent));
 }

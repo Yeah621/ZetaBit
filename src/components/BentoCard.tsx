@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router';
+
+type Accent = 'lavender' | 'peach' | 'mint';
 
 interface BentoCardProps {
   title: string;
   description: string;
   icon: ReactNode;
+  accent: Accent;
   /** Larger card, meant for the one mode that's actually playable today. */
   large?: boolean;
   /** Present but not yet wired to anything real (no backend yet). */
@@ -12,11 +15,18 @@ interface BentoCardProps {
   to?: string;
 }
 
-export default function BentoCard({ title, description, icon, large, comingSoon, to }: BentoCardProps) {
+export default function BentoCard({ title, description, icon, accent, large, comingSoon, to }: BentoCardProps) {
+  // Sets the --card-accent custom property the .bento-card / .bento-icon
+  // CSS (index.css) reads from - keeps this a plain, static Tailwind
+  // class list (accent-lavender/peach/mint would need per-value classes
+  // Tailwind can't see at build time since they'd be built dynamically).
+  const accentStyle = { '--card-accent': `var(--color-${accent})` } as CSSProperties;
+
   const content = (
     <div
-      className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-bg-raised p-6 transition-colors ${
-        comingSoon ? '' : 'hover:border-accent-dim active:scale-[0.99]'
+      style={accentStyle}
+      className={`bento-card relative flex h-full flex-col justify-between overflow-hidden rounded-3xl p-6 ${
+        comingSoon ? '' : 'is-active active:scale-[0.99]'
       } ${large ? 'sm:p-8' : ''}`}
     >
       {comingSoon && (
@@ -25,11 +35,7 @@ export default function BentoCard({ title, description, icon, large, comingSoon,
         </span>
       )}
 
-      <div
-        className={`grid place-items-center rounded-xl bg-accent/10 text-accent ${
-          large ? 'h-12 w-12' : 'h-10 w-10'
-        }`}
-      >
+      <div className={`bento-icon grid place-items-center rounded-2xl ${large ? 'h-12 w-12' : 'h-10 w-10'}`}>
         {icon}
       </div>
 
@@ -41,11 +47,11 @@ export default function BentoCard({ title, description, icon, large, comingSoon,
   );
 
   if (comingSoon || !to) {
-    return <div className="h-full cursor-default opacity-80">{content}</div>;
+    return <div className="h-full cursor-default opacity-90">{content}</div>;
   }
 
   return (
-    <Link to={to} className="block h-full transition-transform duration-200 ease-out">
+    <Link to={to} className="block h-full">
       {content}
     </Link>
   );

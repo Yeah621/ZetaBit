@@ -13,7 +13,11 @@ export default function Home() {
       <Navbar />
 
       <main className="mx-auto flex max-w-5xl flex-col items-center px-6 pb-20 pt-6 text-center sm:pt-10">
-        <div className="w-40 sm:w-48">
+        <div className="relative w-40 sm:w-48">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 scale-150 rounded-full bg-lavender/20 blur-3xl"
+          />
           <ChessBoard
             config={{
               fen: HERO_FEN,
@@ -39,6 +43,7 @@ export default function Home() {
             <BentoCard
               large
               to="/local"
+              accent="lavender"
               title="Local Pass & Play"
               description="Main gantian di satu perangkat yang sama, tanpa koneksi apa pun."
               icon={
@@ -54,6 +59,7 @@ export default function Home() {
 
           <BentoCard
             comingSoon
+            accent="peach"
             title="Play with Friend"
             description="Undang teman lewat kode room dan main real-time."
             icon={
@@ -66,6 +72,7 @@ export default function Home() {
 
           <BentoCard
             comingSoon
+            accent="mint"
             title="Play with AI"
             description="Latih strategi lawan bot dengan level yang bisa diatur."
             icon={

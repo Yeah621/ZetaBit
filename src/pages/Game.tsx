@@ -80,7 +80,7 @@ export default function Game({ mode }: GameProps) {
         </div>
 
         <aside className="flex w-full flex-col gap-4 lg:w-64">
-          <div className="glass-panel rounded-xl px-5 py-4">
+          <div className="glass-panel rounded-2xl px-5 py-4">
             <div className="flex items-center gap-2">
               <span
                 className={`h-2.5 w-2.5 rounded-full ${game.turn === 'white' ? 'bg-text-primary' : 'bg-bg-sunken ring-1 ring-text-secondary'}`}
@@ -94,13 +94,13 @@ export default function Game({ mode }: GameProps) {
           <div className="flex gap-3">
             <button
               onClick={handleFlip}
-              className="flex-1 rounded-md border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary transition active:scale-95"
+              className="flex-1 rounded-xl border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary transition active:scale-95"
             >
               Flip board
             </button>
             <button
               onClick={handleReset}
-              className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary active:scale-95"
+              className="flex-1 rounded-xl border border-border px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary active:scale-95"
             >
               Reset
             </button>
