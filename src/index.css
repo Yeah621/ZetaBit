@@ -1,19 +1,14 @@
 @import "tailwindcss";
 
 /**
- * Design tokens - Fase 2, v5.
- * Same v4 foundation (light app, dark hero band on Home, gold accent,
- * layered gradients + noise texture, gradient "glow" buttons, lift-on-
- * hover cards, glass navbar, Poppins/Inter) but with the one piece v4
- * deliberately deferred: a real light/dark toggle. Every surface/ink
- * color below is a single CSS variable, so `.dark` only has to override
- * the handful that represent canvas + ink (bg-base/raised/sunken,
- * border, text-primary/secondary) - accent gold and the hero band's own
- * navy-plum gradient are IDENTICAL in both themes on purpose, so the
- * brand doesn't shift when someone flips the switch, only the canvas
- * around it does. This is also why components barely had to change:
- * anything already built from `bg-bg-base` / `text-text-primary` / etc.
- * re-themes for free.
+ * Design tokens - Fase 2, v4.
+ * Same structure as v3 (light app, dark hero band on Home, gold accent)
+ * but with actual craft/polish borrowed from a reference the user
+ * shared (techniques only, not its content): layered gradients + a
+ * faint noise texture on the hero instead of a flat fill, gradient
+ * "glow" buttons, cards that lift on hover instead of just re-coloring,
+ * a glass/blur navbar. Poppins for headings (confident, geometric),
+ * Inter for body text - also matches the reference's pairing.
  */
 @theme {
   --color-bg-base: #faf6ef;
@@ -42,40 +37,6 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
-/* Ambient shadow tint + a board-specific glow - kept OUTSIDE @theme
-   since these are raw colors plugged into hand-written box-shadow lists
-   below, not full shadow values Tailwind should turn into utilities of
-   their own. */
-:root {
-  --shadow-ambient: rgba(42, 38, 32, 0.25);
-  --shadow-ambient-strong: rgba(42, 38, 32, 0.3);
-  --board-glow: color-mix(in srgb, var(--color-accent) 16%, transparent);
-}
-
-/**
- * Dark theme - v5's one deferred piece. Overrides only the tokens above
- * that represent canvas/ink/shadow. `.dark` and `:root` tie on
- * specificity (0,1,0 each), so this block has to sit AFTER `@theme` in
- * the file - source order is the tiebreaker, and this way it wins.
- * Values aren't invented fresh: bg-raised/bg-base reuse the hero's own
- * hero-from/hero-to, and text-primary/secondary reuse text-on-dark/
- * text-on-dark-secondary, so dark mode reads as "the whole app now
- * lives in the hero's world" instead of a second, unrelated palette.
- */
-.dark {
-  --color-bg-base: #15121d;
-  --color-bg-raised: #241f33;
-  --color-bg-sunken: #0d0b13;
-  --color-border: #382f4d;
-
-  --color-text-primary: #f5f1e8;
-  --color-text-secondary: #b3a9c2;
-
-  --shadow-ambient: rgba(0, 0, 0, 0.5);
-  --shadow-ambient-strong: rgba(0, 0, 0, 0.6);
-  --board-glow: color-mix(in srgb, var(--color-accent) 30%, transparent);
-}
-
 html,
 body,
 #root {
@@ -86,9 +47,6 @@ body {
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
 }
 
 /* ===== Hero band (Home only) =====
@@ -107,9 +65,7 @@ body {
   font-family: var(--font-heading);
 }
 
-/* Sticky glass navbar - reads as premium once content scrolls under it.
-   Hardcoded to hero-from on purpose: it only ever lives inside the
-   permanently-dark hero band, unlike .topbar-glass below. */
+/* Sticky glass navbar - reads as premium once content scrolls under it. */
 .nav-glass {
   position: sticky;
   top: 0;
@@ -156,39 +112,13 @@ body {
   transform: translateY(-2px);
 }
 
-/* Secondary action button for theme-adaptive content pages. Same shape
-   as .btn-outline but built from text-primary/border instead of
-   text-on-dark, since (unlike .btn-outline's one hero use today) this
-   sits on a surface that switches between light and dark itself. */
-.btn-ghost {
-  border: 1.5px solid var(--color-border);
-  color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-bg-raised) 60%, transparent);
-  transition:
-    transform 200ms ease-out,
-    background-color 200ms ease-out,
-    border-color 200ms ease-out;
-}
-.btn-ghost:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-  background: color-mix(in srgb, var(--color-bg-raised) 88%, transparent);
-  transform: translateY(-2px);
-}
-.btn-ghost:active {
-  transform: translateY(0);
-}
-
 /* Restrained glassmorphism (master-prompt bagian 4) for the player/turn
    card on the Game screen. */
 .glass-panel {
   background: color-mix(in srgb, var(--color-bg-raised) 70%, transparent);
   backdrop-filter: blur(8px);
   border: 1px solid var(--color-border);
-  box-shadow: 0 8px 24px -14px var(--shadow-ambient);
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+  box-shadow: 0 8px 24px -14px rgba(42, 38, 32, 0.25);
 }
 
 /* Each bento card gets a soft tint wash of its own accent (set via the
@@ -201,7 +131,7 @@ body {
     var(--color-bg-raised) 60%
   );
   border: 1px solid var(--color-border);
-  box-shadow: 0 6px 20px -14px var(--shadow-ambient-strong);
+  box-shadow: 0 6px 20px -14px rgba(42, 38, 32, 0.3);
   transition:
     transform 250ms ease-out,
     box-shadow 250ms ease-out,
@@ -215,121 +145,4 @@ body {
 .bento-icon {
   background: color-mix(in srgb, var(--card-accent, var(--color-accent)) 16%, transparent);
   color: var(--card-accent, var(--color-accent));
-}
-
-/* ===== Content-page header (Game, and future pages) =====
-   Same "glass" idea as .nav-glass, but theme-adaptive (bg-raised, not
-   hero-from) since these pages switch between light and dark themselves
-   instead of living permanently inside the dark hero. Not sticky: these
-   pages are short enough that a pinned header isn't worth the trade-off
-   of needing overflow-hidden on an ancestor for the atmosphere glow
-   below (overflow-hidden on any ancestor breaks position:sticky). */
-.topbar-glass {
-  backdrop-filter: blur(16px) saturate(160%);
-  background: color-mix(in srgb, var(--color-bg-raised) 72%, transparent);
-  border-bottom: 1px solid var(--color-border);
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
-}
-
-.back-pill {
-  border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-bg-raised) 55%, transparent);
-  color: var(--color-text-primary);
-  transition:
-    border-color 200ms ease-out,
-    color 200ms ease-out,
-    transform 200ms ease-out;
-}
-.back-pill:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-  color: var(--color-accent);
-  transform: translateX(-2px);
-}
-
-/* ===== Board frame (bezel) =====
-   A real board never floats bare on a table - there's always a border
-   around the playing surface (wood, leather, felt). Same idea here:
-   padding + a soft gold-tinted gradient + a hairline gold edge + a
-   layered shadow (ring, two ambient layers, a gold glow, and an inset
-   top highlight - the same "light catching an edge" trick as the
-   reference's card borders) instead of the board sitting on a flat
-   drop-shadow. Chessground's own square colors are untouched - only the
-   frame around them changed. */
-.board-frame {
-  position: relative;
-  overflow: hidden;
-  padding: 0.875rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--color-accent) 7%, var(--color-bg-raised)),
-    var(--color-bg-raised) 55%
-  );
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-accent) 14%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--color-accent) 22%, transparent),
-    0 10px 28px -14px var(--shadow-ambient),
-    0 24px 60px -24px var(--shadow-ambient-strong),
-    0 0 48px -12px var(--board-glow);
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
-}
-.board-frame::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14%;
-  right: 14%;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-}
-.board-frame-inner {
-  border-radius: 0.625rem;
-  overflow: hidden;
-}
-
-/* ===== Theme toggle =====
-   Sun / pill / moon, the reference's own toggle-pill idea. The track's
-   OFF color is `currentColor` at low opacity rather than a bg/border
-   token, so the SAME component reads correctly both inside Home's
-   permanently-dark hero and on a theme-adaptive page: it just inherits
-   whatever muted tone the caller already knows is legible in its own
-   context (see ThemeToggle.tsx's `mutedClassName` prop). "ON" (dark
-   mode) is always solid accent gold, same as the reference. */
-.theme-toggle {
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-}
-.theme-toggle-track {
-  display: inline-block;
-  width: 34px;
-  height: 19px;
-  border-radius: 999px;
-  background: color-mix(in srgb, currentColor 24%, transparent);
-  position: relative;
-  transition: background-color 0.25s ease;
-  flex-shrink: 0;
-}
-.theme-toggle-track[data-state='dark'] {
-  background: var(--color-accent);
-}
-.theme-toggle-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: transform 0.25s ease;
-}
-.theme-toggle-track[data-state='dark'] .theme-toggle-thumb {
-  transform: translateX(15px);
 }
