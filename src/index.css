@@ -1,7 +1,52 @@
 @import "tailwindcss";
 
+/**
+ * Design tokens - Fase 2 (see chess-app-master-prompt.md bagian 4).
+ * Dark-first, low-stimulus. Accent is a brighter derivative of the
+ * board's own dark-square green (#769656) so the UI and the board read
+ * as one identity without literally reusing the board's exact color
+ * (that stays reserved for the board itself).
+ */
+@theme {
+  --color-bg-base: #161512;
+  --color-bg-raised: #1e1c17;
+  --color-bg-sunken: #100f0d;
+  --color-border: #2c2a24;
+
+  --color-accent: #8fbf67;
+  --color-accent-dim: #5f7a49;
+
+  --color-text-primary: #ece7dc;
+  --color-text-secondary: #948e80;
+
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
 html,
 body,
 #root {
   height: 100%;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* Restrained glassmorphism per bagian 4 - thin translucency + soft
+   gradient border + soft shadow, NOT heavy blur. Reserved for the
+   player/turn card and (later) the Play Setup modal - never the board
+   or main chrome. Apply as a class rather than baking it into every
+   card, so it stays the deliberate exception it's meant to be. */
+.glass-panel {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-bg-raised) 55%, transparent),
+    color-mix(in srgb, var(--color-bg-raised) 30%, transparent)
+  );
+  backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }

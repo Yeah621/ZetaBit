@@ -60,8 +60,9 @@ export function useChessGame(): ChessGameState {
     let cancelled = false;
     loadWasm().then(() => {
       if (cancelled) return;
-      gameRef.current = new Game();
-      setSnapshot(gameRef.current.state() as StateSnapshot);
+      const game = new Game();
+      gameRef.current = game;
+      setSnapshot(game.state() as StateSnapshot);
     });
     return () => {
       cancelled = true;
@@ -81,9 +82,10 @@ export function useChessGame(): ChessGameState {
   }, []);
 
   const reset = useCallback(() => {
-    if (!gameRef.current) return;
-    gameRef.current = new Game();
-    setSnapshot(gameRef.current.state() as StateSnapshot);
+    if (!gameRef.current) return; // wasm not loaded yet, nothing to reset
+    const game = new Game();
+    gameRef.current = game;
+    setSnapshot(game.state() as StateSnapshot);
   }, []);
 
   const dests = useMemo(() => {
