@@ -83,7 +83,7 @@ export default function Game({ mode }: GameProps) {
           <div className="glass-panel rounded-2xl px-5 py-4">
             <div className="flex items-center gap-2">
               <span
-                className={`h-2.5 w-2.5 rounded-full ${game.turn === 'white' ? 'bg-text-primary' : 'bg-bg-sunken ring-1 ring-text-secondary'}`}
+                className={`h-2.5 w-2.5 rounded-full ${game.turn === 'white' ? 'bg-white ring-1 ring-border' : 'bg-hero-to'}`}
                 aria-hidden="true"
               />
               <span className="text-sm text-text-primary">{game.ready ? turnLabel : 'Memuat...'}</span>

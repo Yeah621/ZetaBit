@@ -1,30 +1,36 @@
 @import "tailwindcss";
 
 /**
- * Design tokens - Fase 2, v2 (revised after feedback: dark but more
- * colorful/lively, soft-pastel direction rather than the original
- * single-muted-green take on "dark-first" from the master prompt).
- * Base is a deep plum-charcoal (not flat black) so it has some warmth
- * of its own; three soft pastels give the three home-screen modes each
- * their own gentle identity instead of one single accent everywhere.
- * The board's own colors (chessground-theme.css) are untouched on
- * purpose - it stays the one grounded, unchanging element in the app.
+ * Design tokens - Fase 2, v3.
+ * Pivoted from an all-dark theme (felt flat/plain) to: a warm light
+ * cream base for the app overall (per feedback: "jangan full gelap"),
+ * with ONE rich dark navy/plum band reserved for the Home hero only -
+ * that's where the "dark + gold" reference image's mood lives. Gold is
+ * the primary accent (echoes the reference); lavender/peach/mint stay
+ * as the three home-mode identity colors, deepened so they read
+ * clearly on a light background instead of the earlier pastel-on-dark
+ * version. The board's own colors are still untouched.
  */
 @theme {
-  --color-bg-base: #1a1721;
-  --color-bg-raised: #252030;
-  --color-bg-sunken: #100e15;
-  --color-border: #362f42;
+  --color-bg-base: #faf6ef;
+  --color-bg-raised: #ffffff;
+  --color-bg-sunken: #f0ead9;
+  --color-border: #e8e0d0;
 
-  --color-accent: #c9b6f2;
-  --color-accent-dim: #8a7aa8;
+  --color-hero-from: #241f33;
+  --color-hero-to: #15121d;
 
-  --color-lavender: #c9b6f2;
-  --color-peach: #f6c2a0;
-  --color-mint: #a3e8c4;
+  --color-accent: #d9a441;
+  --color-accent-dim: #b98a34;
 
-  --color-text-primary: #f1ecf7;
-  --color-text-secondary: #a79fb8;
+  --color-lavender: #8b6fd4;
+  --color-peach: #e0824c;
+  --color-mint: #2f9e6e;
+
+  --color-text-primary: #2a2620;
+  --color-text-secondary: #766f61;
+  --color-text-on-dark: #f5f1e8;
+  --color-text-on-dark-secondary: #b3a9c2;
 
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
@@ -42,40 +48,48 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Restrained glassmorphism per master-prompt bagian 4 - thin
-   translucency + soft gradient border + soft shadow, NOT heavy blur.
-   Reserved for the player/turn card and (later) the Play Setup modal -
-   never the board or main chrome. */
-.glass-panel {
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-bg-raised) 55%, transparent),
-    color-mix(in srgb, var(--color-bg-raised) 30%, transparent)
-  );
-  backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
-  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+/* Reserved for the Home hero (navbar + intro) - the one deliberately
+   dark, rich surface in an otherwise light app. */
+.hero-band {
+  background: linear-gradient(160deg, var(--color-hero-from), var(--color-hero-to));
 }
 
-/* Each bento card gets a soft gradient wash of its own pastel (set via
-   the --card-accent custom property on the element, see BentoCard.tsx)
-   instead of one flat charcoal fill everywhere - this is the main
-   "more alive" change from the first pass. */
+/* Small floating badges over the hero board, echoing the reference's
+   floating stat cards - white chips that pop against the dark band. */
+.floating-badge {
+  background: var(--color-bg-raised);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
+}
+
+/* Restrained glassmorphism (master-prompt bagian 4) for the player/turn
+   card on the Game screen - light-appropriate version: a frosted white,
+   not a dark tint, since the app base is light now. */
+.glass-panel {
+  background: color-mix(in srgb, var(--color-bg-raised) 70%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px -14px rgba(42, 38, 32, 0.25);
+}
+
+/* Each bento card gets a soft tint wash of its own accent (set via the
+   --card-accent custom property, see BentoCard.tsx) instead of one
+   flat white fill everywhere. */
 .bento-card {
   background: linear-gradient(
     160deg,
-    color-mix(in srgb, var(--card-accent, var(--color-accent)) 16%, var(--color-bg-raised)),
-    var(--color-bg-raised) 65%
+    color-mix(in srgb, var(--card-accent, var(--color-accent)) 10%, var(--color-bg-raised)),
+    var(--color-bg-raised) 60%
   );
   border: 1px solid var(--color-border);
+  box-shadow: 0 6px 20px -14px rgba(42, 38, 32, 0.3);
   transition:
     border-color 200ms ease-out,
     transform 150ms ease-out;
 }
 .bento-card.is-active:hover {
-  border-color: color-mix(in srgb, var(--card-accent, var(--color-accent)) 50%, var(--color-border));
+  border-color: color-mix(in srgb, var(--card-accent, var(--color-accent)) 55%, var(--color-border));
 }
 .bento-icon {
-  background: color-mix(in srgb, var(--card-accent, var(--color-accent)) 22%, transparent);
+  background: color-mix(in srgb, var(--card-accent, var(--color-accent)) 16%, transparent);
   color: var(--card-accent, var(--color-accent));
 }
