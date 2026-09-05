@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import ThemeToggle from './ThemeToggle';
 
 /**
  * Lives inside the dark hero-band on Home, so it's styled for a dark
@@ -7,7 +8,7 @@ import { Link } from 'react-router';
  */
 export default function Navbar() {
   return (
-    <header className="nav-glass flex items-center px-6 py-4 sm:px-10">
+    <header className="nav-glass flex items-center justify-between px-6 py-4 sm:px-10">
       <Link to="/" className="flex items-center gap-2.5">
         <span
           aria-hidden="true"
@@ -19,6 +20,12 @@ export default function Navbar() {
         </span>
         <span className="font-heading font-semibold tracking-tight text-text-on-dark">ZetaBit</span>
       </Link>
+
+      {/* mutedClassName override: this navbar's backdrop is always the
+          dark hero, in both site themes, so the toggle's inactive icon
+          needs the hero's own on-dark token, not the theme-adaptive one
+          ThemeToggle defaults to (see its own doc comment). */}
+      <ThemeToggle mutedClassName="text-text-on-dark-secondary" />
     </header>
   );
 }
