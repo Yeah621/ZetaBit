@@ -26,7 +26,7 @@ export default function BentoCard({ title, description, icon, accent, large, com
     <div
       style={accentStyle}
       className={`bento-card relative flex h-full flex-col justify-between overflow-hidden rounded-3xl p-6 ${
-        comingSoon ? '' : 'is-active active:scale-[0.99]'
+        comingSoon ? '' : 'is-active'
       } ${large ? 'sm:p-8' : ''}`}
     >
       {comingSoon && (
@@ -40,7 +40,7 @@ export default function BentoCard({ title, description, icon, accent, large, com
       </div>
 
       <div className="mt-8">
-        <h3 className={`font-semibold text-text-primary ${large ? 'text-2xl' : 'text-lg'}`}>{title}</h3>
+        <h3 className={`font-heading font-semibold text-text-primary ${large ? 'text-2xl' : 'text-lg'}`}>{title}</h3>
         <p className={`mt-2 text-text-secondary ${large ? 'text-base' : 'text-sm'}`}>{description}</p>
       </div>
     </div>

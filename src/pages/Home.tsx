@@ -16,7 +16,7 @@ export default function Home() {
 
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 px-6 pb-16 pt-6 sm:pt-10 lg:flex-row lg:items-center lg:gap-16 lg:pb-24">
           <div className="text-center lg:flex-1 lg:text-left">
-            <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-text-on-dark sm:text-5xl">
+            <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-text-on-dark sm:text-5xl">
               Asah Taktik
               <br />
               <span className="text-accent">Kuasai Papan</span>
@@ -30,20 +30,20 @@ export default function Home() {
             <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
               <Link
                 to="/local"
-                className="rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-hero-to transition active:scale-95"
+                className="btn-gold rounded-xl px-6 py-3 text-sm font-heading font-semibold"
               >
                 Main Sekarang
               </Link>
               <a
                 href="#modes"
-                className="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-text-on-dark transition active:scale-95"
+                className="btn-outline rounded-xl px-6 py-3 text-sm font-heading font-semibold"
               >
                 Lihat Mode Lain
               </a>
             </div>
           </div>
 
-          <div className="relative w-48 shrink-0 sm:w-56">
+          <div className="relative aspect-square w-48 shrink-0 sm:w-56">
             <div
               aria-hidden="true"
               className="absolute inset-0 -z-10 scale-150 rounded-full bg-lavender/25 blur-3xl"
