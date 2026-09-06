@@ -1,0 +1,84 @@
+/**
+ * Chess.com-style theme for Chessground.
+ *
+ * This file REPLACES chessground's own theme css (e.g. chessground.brown.css)
+ * - only `chessground.base.css` + this file are needed for the board chrome.
+ * Piece artwork is a separate concern, handled by whichever piece-set css
+ * you import in ChessBoard.tsx.
+ */
+
+:root {
+  --board-light: #f0d9b5;
+  --board-dark: #769656;
+  --board-last-move: rgba(246, 235, 82, 0.8);
+}
+
+/* Chessground's own `.cg-wrap` defaults to a fixed 320x320px box. We fill
+   whatever responsive container the consumer puts around <ChessBoard />
+   instead - see the aspect-square wrapper in App.tsx. */
+.cg-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- The checkerboard itself -------------------------------------------
+   In chessground's base css, `cg-board` has no color of its own: the 8x8
+   checker pattern is one tiled background image. We build that pattern
+   with a pure-CSS conic-gradient (no external image, perfectly crisp at
+   any size, and trivial to re-theme - just change the two variables above).
+
+   A conic-gradient with hard stops at the four cardinal angles (0/90/180/
+   270deg) on a square box produces four clean rectangular quadrants, not
+   pie wedges, because those angles line up exactly with the box's own
+   center-lines. `background-size: 25% 25%` then tiles that one 2x2 cell
+   four times across each axis = 8 squares per side. a8 (top-left) works
+   out to a light square, matching a real board. */
+cg-board {
+  background-image: conic-gradient(
+    var(--board-dark) 0deg 90deg,
+    var(--board-light) 90deg 180deg,
+    var(--board-dark) 180deg 270deg,
+    var(--board-light) 270deg 360deg
+  );
+  background-size: 25% 25%;
+}
+
+/* Last-move highlight, tuned to sit nicely on the tan/green palette above
+   (chessground's own default is a lichess-flavoured yellow-green). */
+cg-board square.last-move {
+  background-color: var(--board-last-move);
+}
+
+/* --- Coordinates: tucked inside the corner squares, like chess.com/lichess,
+   instead of chessground's demo default of floating outside the board. */
+.cg-wrap coords {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 0.62em;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.cg-wrap coords.ranks {
+  left: 3px;
+  right: auto;
+}
+
+.cg-wrap coords.files {
+  bottom: 2px;
+}
+
+/* Chessground renders one <coord> per rank (1-8) and per file (a-h) in that
+   natural order, then flips them visually with flex-direction depending on
+   orientation. Because a1 is a dark square and squares strictly alternate,
+   nth-child(odd) always lands on a dark square and nth-child(even) on a
+   light one on BOTH axes - so we color each label with the *other* board
+   color, the same trick chess.com/lichess use to blend coordinates into
+   the board. If a future chessground version ever changes that render
+   order and this comes out backwards, just swap the two colors below. */
+.cg-wrap coords coord:nth-child(odd) {
+  color: var(--board-light);
+}
+
+.cg-wrap coords coord:nth-child(even) {
+  color: var(--board-dark);
+}

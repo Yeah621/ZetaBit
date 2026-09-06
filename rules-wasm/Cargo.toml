@@ -1,0 +1,21 @@
+[package]
+name = "rules-wasm"
+version = "0.1.0"
+edition = "2021"
+description = "Chess rules (shakmaty) compiled to WASM for client-side legal-move generation. Also a plain rlib so the Axum backend can reuse it later without duplicating this wrapper."
+
+# cdylib -> the .wasm output wasm-pack needs.
+# rlib   -> lets a normal Rust crate (the future Axum backend, Phase 3) depend
+#           on this one directly instead of re-wrapping shakmaty a second time.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+shakmaty = "0.30"
+wasm-bindgen = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+
+[profile.release]
+opt-level = "s"
+lto = true
