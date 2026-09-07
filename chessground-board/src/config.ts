@@ -1,7 +1,5 @@
-// URL backend Axum. Sekarang di-hardcode ke localhost karena backend-nya
-// belum di-deploy ke mana pun - masih jalan di komputer sendiri lewat
-// `cargo run` (lihat backend/README.md). Ganti jadi env var
-// (import.meta.env.VITE_BACKEND_URL) begitu backend-nya udah live di
-// hosting (Railway/Fly/dsb) - itu momen yang pas buat pindah dari
-// hardcode ke env var, gak perlu diributin sekarang.
-export const BACKEND_URL = 'http://localhost:8080';
+// URL backend Axum, di-deploy di Railway. Sebelumnya di-hardcode ke
+// localhost selagi backend cuma jalan lokal (`cargo run`) - sekarang
+// udah live, jadi Play with Friend bisa dites dari device mana pun,
+// gak perlu lagi komputer developer nyala terus.
+export const BACKEND_URL = 'https://zetabit-production.up.railway.app';

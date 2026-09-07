@@ -170,11 +170,9 @@ Belum coba jalan? Build dulu `rules-wasm` sebelum `npm run dev` — lihat [`rule
   client lain. Itu next step (pakai ulang `rules-wasm` di sisi server).
 - **Belum ada**: indikator "nunggu lawan join" (backend belum nge-track berapa koneksi per room),
   reconnect kalau salah satu device refresh/putus, modal promosi (masih auto-queen kayak biasa).
-- **`src/config.ts`**: `BACKEND_URL` di-hardcode ke `http://localhost:8080` karena backend-nya belum
-  di-deploy ke mana pun. Ini artinya create/join room cuma bisa dites di komputer yang backend-nya
-  lagi `cargo run` - kalau teman kamu buka link Vercel-nya dari device lain, punya dia gak akan bisa
-  connect (browser dia nyari `localhost` di device dia sendiri, bukan ke server kamu). Itu beres
-  begitu backend-nya di-deploy ke hosting beneran (Railway/Fly/dsb).
+- **`src/config.ts`**: `BACKEND_URL` sekarang nunjuk ke backend yang udah live di Railway
+  (`https://zetabit-production.up.railway.app`) - Play with Friend bisa dites dari device mana pun,
+  gak perlu lagi komputer developer nyala `cargo run`.
 
 ## Catatan TypeScript
 
