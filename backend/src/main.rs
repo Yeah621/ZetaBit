@@ -7,6 +7,10 @@
 //! ikut nerima. Ini pola resmi dari contoh chat-nya axum sendiri,
 //! disesuaikan supaya ada BANYAK room, bukan cuma satu saluran global.
 //!
+//! Port dibaca dari env var `PORT` (Railway yang nentuin nilainya pas
+//! di-deploy), fallback ke 8080 kalau gak ada (buat lokal, `cargo run`
+//! biasa - gak ada yang berubah dari cara testing sebelumnya).
+//!
 //! Masih raw text broadcast, belum ada bentuk pesan game (fen/move/dst)
 //! - itu langkah setelah ini, sekarang fokusnya cuma mastiin "dua
 //! koneksi ke room yang sama bisa saling dengar" dulu.
@@ -106,9 +110,14 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080")
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
+
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", port))
         .await
-        .expect("gagal bind ke port 8080 - port-nya lagi dipakai proses lain?");
+        .expect("gagal bind ke port - port-nya lagi dipakai proses lain?");
 
     tracing::info!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();

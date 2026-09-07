@@ -103,6 +103,25 @@ ws.onmessage = (e) => console.log('dari server:', e.data);
 ws.onopen = () => ws.send('halo');
 ```
 
+## Deploy ke Railway
+
+Vercel gak bisa dipakai buat ini (lihat bagian bawah) - pakai Railway.
+
+1. Buka **railway.com**, daftar/login (bisa pakai akun GitHub)
+2. **New Project → Deploy from GitHub repo** → pilih repo `ZetaBit`
+3. Setelah service-nya kebuat, buka **Settings** service itu → cari **"Root Directory"** → isi `backend`
+   (biar Railway cuma build folder ini, bukan seluruh repo)
+4. Masih di Settings, cari **Variables** → tambahin `DATABASE_URL` dengan value yang sama persis kayak
+   di file `.env` lokal kamu (connection string Neon)
+5. Railway otomatis detect `Dockerfile` di folder `backend/` dan build pakai itu
+6. Setelah deploy sukses, buka **Settings → Networking → Generate Domain** buat dapetin URL publik
+   (formatnya kira-kira `https://nama-acak.up.railway.app`)
+7. Cek `https://url-railway-kamu/health` di browser - harus muncul `ok (sekian rooms)` sama kayak pas lokal
+
+Setelah dapet URL itu, **update satu baris** di `chessground-board/src/config.ts` - ganti
+`http://localhost:8080` jadi URL Railway kamu, commit+push. Setelah itu, Play with Friend bisa
+dicoba dari device MANA PUN, gak perlu lagi komputer kamu nyala `cargo run`.
+
 ## Kenapa belum bisa di-deploy ke Vercel
 
 Vercel itu serverless functions - tiap request nyalain fungsi baru terus
