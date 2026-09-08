@@ -116,11 +116,11 @@ Vercel gak bisa dipakai buat ini (lihat bagian bawah) - pakai Railway.
 
 1. Buka **railway.com**, daftar/login (bisa pakai akun GitHub)
 2. **New Project → Deploy from GitHub repo** → pilih repo `ZetaBit`
-3. Setelah service-nya kebuat, buka **Settings** service itu → cari **"Root Directory"** → isi `backend`
-   (biar Railway cuma build folder ini, bukan seluruh repo)
+3. Setelah service-nya kebuat, buka **Settings** service itu → cari **"Root Directory"** → **kosongkan**
+   (bukan `backend` lagi - ini penting, lihat catatan di bawah kenapa)
 4. Masih di Settings, cari **Variables** → tambahin `DATABASE_URL` dengan value yang sama persis kayak
    di file `.env` lokal kamu (connection string Neon)
-5. Railway otomatis detect `Dockerfile` di folder `backend/` dan build pakai itu
+5. Railway otomatis detect `Dockerfile` (sekarang ada di ROOT repo, bukan di dalam `backend/`) dan build pakai itu
 6. Setelah deploy sukses, buka **Settings → Networking → Generate Domain** buat dapetin URL publik
    (formatnya kira-kira `https://nama-acak.up.railway.app`)
 7. Cek `https://url-railway-kamu/health` di browser - harus muncul `ok (sekian rooms)` sama kayak pas lokal
@@ -128,6 +128,12 @@ Vercel gak bisa dipakai buat ini (lihat bagian bawah) - pakai Railway.
 Setelah dapet URL itu, **update satu baris** di `chessground-board/src/config.ts` - ganti
 `http://localhost:8080` jadi URL Railway kamu, commit+push. Setelah itu, Play with Friend bisa
 dicoba dari device MANA PUN, gak perlu lagi komputer kamu nyala `cargo run`.
+
+**Kenapa Root Directory berubah**: begitu backend depend ke `rules-wasm` (lewat
+`{ path = "../rules-wasm" }` di `Cargo.toml`, buat validasi gerakan server-side), Docker build-nya
+butuh bisa "lihat" dua folder (`backend/` dan `rules-wasm/`) sekaligus - gak bisa lagi di-scope ke
+`backend/` doang. Makanya `Dockerfile`-nya juga pindah ke root repo (sejajar `backend/`,
+`rules-wasm/`, `chessground-board/`), bukan di dalam `backend/` lagi.
 
 ## Kenapa belum bisa di-deploy ke Vercel
 
