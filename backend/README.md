@@ -5,8 +5,9 @@ Fase 3: server Axum. Progress:
 - Langkah 2: nyambungin Postgres - selesai
 - Langkah 3: migration pertama, tabel `rooms` - selesai
 - Langkah 4: create + join room - selesai
-- Langkah 5: WebSocket nempel ke room tertentu (broadcast) - sekarang di sini
-- Berikutnya: Fase 4 - bentuk pesan game beneran (fen/move) lewat saluran ini
+- Langkah 5: WebSocket nempel ke room tertentu (broadcast) - selesai
+- Fase 4 lanjutan: validasi gerakan di server pakai `rules-wasm` (`GameCore`) - sekarang di sini
+- Berikutnya: "nunggu lawan join" indicator, reconnect handling, atau Fase 5 (Play with AI)
 
 ## Langkah 2: dapetin database Postgres gratis (Neon)
 
@@ -94,14 +95,20 @@ pesannya sendiri balik (`TAB 1 dapet: halo dari tab 1`) - itu normal untuk langk
 gak mbedain "punya siapa"), bukan bug. Membedakan pengirim sendiri vs lawan itu kerjaan Fase 4
 pas bentuk pesannya udah terstruktur (bukan raw text lagi).
 
-WebSocket echo (langkah 1) masih jalan sama seperti sebelumnya, belum ada
-yang berubah di situ:
+## Cek validasi gerakan (Fase 4 lanjutan)
 
+Pakai room dan 2 tab yang sama seperti tes di atas. Di **Tab 1**, kirim gerakan **legal** (pion e2
+ke e4, dari posisi awal):
 ```js
-const ws = new WebSocket('ws://localhost:8080/ws');
-ws.onmessage = (e) => console.log('dari server:', e.data);
-ws.onopen = () => ws.send('halo');
+ws1.send(JSON.stringify({ type: 'move', orig: 'e2', dest: 'e4', promotion: null, senderId: 'x' }))
 ```
+Harus muncul di **Tab 2**. Sekarang coba kirim gerakan **ilegal** dari posisi yang sama (pion
+lompat ke e5, gak mungkin dalam sekali jalan):
+```js
+ws1.send(JSON.stringify({ type: 'move', orig: 'e2', dest: 'e5', promotion: null, senderId: 'x' }))
+```
+Kali ini **tidak ada apa pun** yang muncul di tab manapun (server diam-diam menolak) - itu tandanya
+validasi jalan. Cek juga log di terminal `cargo run`, harus ada baris `WARN ... gerakan ditolak`.
 
 ## Deploy ke Railway
 

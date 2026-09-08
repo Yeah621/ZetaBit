@@ -1,19 +1,19 @@
-//! Fase 3, langkah 5: WebSocket nempel ke room tertentu.
+//! Fase 4 lanjutan: validasi gerakan di sisi server.
 //!
-//! `/ws/{code}` sekarang beneran masuk ke "saluran" broadcast milik
-//! room itu (satu HashMap: kode room -> broadcast channel). Semua
-//! koneksi yang connect ke room yang sama saling dengar - kirim dari
-//! satu koneksi, semua koneksi lain di room itu (termasuk diri sendiri)
-//! ikut nerima. Ini pola resmi dari contoh chat-nya axum sendiri,
-//! disesuaikan supaya ada BANYAK room, bukan cuma satu saluran global.
+//! Sebelumnya `/ws/{code}` cuma nerusin apa aja yang dikirim (raw
+//! broadcast, gak ada yang dicek). Sekarang pesan `{"type":"move",...}`
+//! divalidasi dulu pakai `rules-wasm` (crate yang sama yang dipakai
+//! WASM di frontend, dipakai di sini sebagai rlib biasa - lihat
+//! `GameCore` di `rules-wasm/src/lib.rs`) sebelum di-broadcast dan
+//! sebelum FEN room-nya di-update di database. Gerakan ilegal ditolak
+//! diam-diam (gak di-broadcast ke siapa pun) - client yang ngirim gak
+//! dapet konfirmasi apa pun buat gerakan yang ditolak. Pesan yang bukan
+//! format "move" yang dikenal tetap diteruskan apa adanya (gak diblokir),
+//! biar gak ngerusak hal lain yang mungkin masih dikirim.
 //!
 //! Port dibaca dari env var `PORT` (Railway yang nentuin nilainya pas
 //! di-deploy), fallback ke 8080 kalau gak ada (buat lokal, `cargo run`
 //! biasa - gak ada yang berubah dari cara testing sebelumnya).
-//!
-//! Masih raw text broadcast, belum ada bentuk pesan game (fen/move/dst)
-//! - itu langkah setelah ini, sekarang fokusnya cuma mastiin "dua
-//! koneksi ke room yang sama bisa saling dengar" dulu.
 
 use std::{
     collections::HashMap,
@@ -31,7 +31,7 @@ use axum::{
     Json, Router,
 };
 use futures_util::{SinkExt, StreamExt};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use tokio::sync::broadcast;
 use tower_http::cors::CorsLayer;
@@ -187,8 +187,8 @@ async fn ws_handler(
 /// Nyambung ke saluran broadcast milik `code` (dibikin kalau belum ada),
 /// lalu jalanin dua arah sekaligus lewat dua task terpisah: satu
 /// nerusin pesan DARI saluran KE socket ini, satu lagi nerusin pesan
-/// DARI socket ini KE saluran (biar semua koneksi lain di room yang
-/// sama ikut kebagian).
+/// DARI socket ini KE saluran - tapi sekarang lewat validasi dulu kalau
+/// bentuknya pesan "move" (lihat `validate_and_apply_move`).
 async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
     let tx = {
         let mut rooms = state.rooms.lock().unwrap();
@@ -210,10 +210,28 @@ async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
     });
 
     let tx2 = tx.clone();
+    let db = state.db.clone();
+    let code2 = code.clone();
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
             if let Message::Text(text) = msg {
-                let _ = tx2.send(text.to_string());
+                let text = text.to_string();
+                match validate_move_if_applicable(&db, &code2, &text).await {
+                    Ok(()) => {
+                        // valid (atau bukan pesan "move" - dilewatin apa
+                        // adanya), teruskan ke semua koneksi di room ini
+                        let _ = tx2.send(text);
+                    }
+                    Err(reason) => {
+                        // ilegal - sengaja TIDAK di-broadcast. Pengirim
+                        // gak dapet balasan apa pun buat gerakan yang
+                        // ditolak (client jujur gak akan pernah ngirim
+                        // ini karena UI-nya sendiri udah nyaring lewat
+                        // rules-wasm; ini jaring pengaman buat client
+                        // yang nakal/rusak).
+                        tracing::warn!("gerakan ditolak di room {code2}: {reason}");
+                    }
+                }
             }
         }
     });
@@ -226,4 +244,53 @@ async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
     }
 
     tracing::info!("koneksi ke room {code} ditutup");
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+enum ClientMessage {
+    Move {
+        orig: String,
+        dest: String,
+        promotion: Option<String>,
+    },
+}
+
+/// Kalau `text` adalah pesan `{"type":"move",...}`: validasi lewat
+/// `rules-wasm` terhadap FEN room saat ini, dan kalau legal, update FEN
+/// room itu di database. Balikin `Err` kalau room-nya gak ketemu atau
+/// gerakannya ilegal.
+///
+/// Kalau `text` BUKAN pesan bentuk itu (gagal di-parse) - dianggap
+/// bukan tanggung jawab fungsi ini, balikin `Ok(())` biar tetap
+/// diteruskan apa adanya (jangan nge-block sesuatu yang belum kita
+/// kenal formatnya).
+async fn validate_move_if_applicable(db: &PgPool, code: &str, text: &str) -> Result<(), String> {
+    let Ok(ClientMessage::Move {
+        orig,
+        dest,
+        promotion,
+    }) = serde_json::from_str::<ClientMessage>(text)
+    else {
+        return Ok(());
+    };
+
+    let current_fen: String = sqlx::query_scalar::<_, String>("SELECT fen FROM rooms WHERE code = $1")
+        .bind(code)
+        .fetch_optional(db)
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "room gak ketemu".to_string())?;
+
+    let mut game = rules_wasm::GameCore::from_fen(&current_fen)?;
+    let snapshot = game.apply_move(&orig, &dest, promotion.as_deref())?;
+
+    sqlx::query("UPDATE rooms SET fen = $1 WHERE code = $2")
+        .bind(&snapshot.fen)
+        .bind(code)
+        .execute(db)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }

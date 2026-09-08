@@ -1,11 +1,17 @@
 # rules-wasm
 
-Chess rules for the chess-app frontend: `shakmaty` (the same rules crate
-the eventual Axum backend will use) compiled to WASM. Gives Chessground's
-`movable.dests` real legal moves instead of `movable.free: true`.
+Chess rules for the chess-app: `shakmaty` wrapped in `GameCore` (plain
+Rust, no wasm-bindgen) plus a thin WASM-facing wrapper (`Game`) around
+it. `GameCore` is what makes this crate genuinely reusable - the
+frontend uses `Game` compiled to WASM for instant client-side legal-move
+preview; the backend depends on this crate directly as a normal Rust
+library and uses `GameCore` for authoritative server-side move
+validation (Play with Friend). Same rules, two consumers, one
+implementation.
 
-Also compiles as a plain `rlib`, so Phase 3's Axum backend can depend on
-this crate directly instead of wrapping shakmaty a second time.
+Also compiles as a plain `rlib` (see `[lib] crate-type` in Cargo.toml),
+which is what lets the Axum backend depend on this crate directly
+instead of wrapping shakmaty a second time.
 
 ## Build
 
