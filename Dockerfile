@@ -1,26 +1,17 @@
 # Dockerfile ini HARUS ada di root repo (sejajar backend/, rules-wasm/,
-# chessground-board/) - bukan di dalam backend/ lagi. Alasannya: backend
-# depend ke rules-wasm lewat path dependency (../rules-wasm), jadi
-# Docker build context-nya harus bisa lihat DUA folder itu sekaligus,
-# gak bisa di-scope ke backend/ doang seperti sebelumnya.
+# chessground-board/), bukan di dalam backend/ - karena backend depend
+# ke rules-wasm lewat path dependency (../rules-wasm), jadi build
+# context-nya harus bisa lihat dua folder itu sekaligus.
 #
-# Pola cargo-chef dari panduan resmi Railway (docs.railway.com/guides/axum),
-# disesuaikan buat struktur dua-folder ini.
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+# Sengaja dibikin sesederhana mungkin (satu stage, gak pakai cargo-chef
+# buat caching layer) setelah versi sebelumnya kena bug path ke-nested.
+# Build-nya jadi sedikit lebih lambat tiap kali (gak ada cache dependency
+# terpisah), tapi jauh lebih gampang dipastikan benar - trade-off yang
+# masuk akal buat project sekecil ini.
+FROM rust:1
 WORKDIR /app
-
-FROM chef AS planner
-COPY backend backend
 COPY rules-wasm rules-wasm
-WORKDIR /app/backend
-RUN cargo chef prepare --recipe-path recipe.json
-
-FROM chef AS builder
-COPY rules-wasm rules-wasm
-COPY --from=planner /app/backend/recipe.json backend/recipe.json
-WORKDIR /app/backend
-RUN cargo chef cook --release --recipe-path recipe.json
 COPY backend backend
+WORKDIR /app/backend
 RUN cargo build --release
-
 CMD ["./target/release/chess-backend"]
