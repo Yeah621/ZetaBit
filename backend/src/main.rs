@@ -207,9 +207,8 @@ async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
         room.count += 1;
         room.tx.clone()
     };
-    broadcast_presence(&state, &code);
-
     let mut rx = tx.subscribe();
+    broadcast_presence(&state, &code);
 
     let (mut sender, mut receiver) = socket.split();
 
