@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import ChessBoard from '../components/ChessBoard';
 import type { Config } from '@lichess-org/chessground/config';
@@ -17,10 +17,20 @@ interface MoveMessage {
   senderId: string;
 }
 
+interface PresenceMessage {
+  type: 'presence';
+  count: number;
+}
+
+type ServerMessage = MoveMessage | PresenceMessage;
+
 export default function FriendRoom() {
   const { code = '' } = useParams<{ code: string }>();
   const game = useChessGame();
   const wsRef = useRef<WebSocket | null>(null);
+  // 1 = cuma kamu, belum ada lawan. Server ngasih tau angka ini tiap
+  // ada yang connect/disconnect ke room ini (lihat pesan "presence").
+  const [connectedCount, setConnectedCount] = useState(1);
 
   // Diisi FriendLobby.tsx pas create ('white') atau join ('black'), lewat
   // sessionStorage biar reload tab yang sama masih inget - tapi kalau
@@ -43,11 +53,15 @@ export default function FriendRoom() {
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
-      let msg: MoveMessage;
+      let msg: ServerMessage;
       try {
         msg = JSON.parse(event.data);
       } catch {
         return; // bukan JSON valid, abaikan
+      }
+      if (msg.type === 'presence') {
+        setConnectedCount(msg.count);
+        return;
       }
       if (msg.senderId === clientId) return; // gema pesan sendiri
       if (msg.type === 'move') {
@@ -132,10 +146,14 @@ export default function FriendRoom() {
               />
               <span className="text-sm text-text-primary">
                 Kamu: {myColor === 'white' ? 'Putih' : 'Hitam'}
-                {game.ready && game.turn === myColor && ' (giliranmu)'}
+                {game.ready && connectedCount > 1 && game.turn === myColor && ' (giliranmu)'}
               </span>
             </div>
-            {resultText && <p className="mt-2 text-sm font-medium text-accent">{resultText}</p>}
+            {connectedCount < 2 ? (
+              <p className="mt-2 text-sm text-peach">Menunggu lawan join... bagikan kode room-nya.</p>
+            ) : (
+              resultText && <p className="mt-2 text-sm font-medium text-accent">{resultText}</p>
+            )}
           </div>
         </aside>
       </main>

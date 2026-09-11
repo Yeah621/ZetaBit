@@ -6,8 +6,9 @@ Fase 3: server Axum. Progress:
 - Langkah 3: migration pertama, tabel `rooms` - selesai
 - Langkah 4: create + join room - selesai
 - Langkah 5: WebSocket nempel ke room tertentu (broadcast) - selesai
-- Fase 4 lanjutan: validasi gerakan di server pakai `rules-wasm` (`GameCore`) - sekarang di sini
-- Berikutnya: "nunggu lawan join" indicator, reconnect handling, atau Fase 5 (Play with AI)
+- Fase 4 lanjutan: validasi gerakan di server pakai `rules-wasm` (`GameCore`) - selesai
+- Fase 4 lanjutan: indikator "menunggu lawan" (presence) - sekarang di sini
+- Berikutnya: reconnect handling, atau Fase 5 (Play with AI)
 
 ## Langkah 2: dapetin database Postgres gratis (Neon)
 
@@ -109,6 +110,21 @@ ws1.send(JSON.stringify({ type: 'move', orig: 'e2', dest: 'e5', promotion: null,
 ```
 Kali ini **tidak ada apa pun** yang muncul di tab manapun (server diam-diam menolak) - itu tandanya
 validasi jalan. Cek juga log di terminal `cargo run`, harus ada baris `WARN ... gerakan ditolak`.
+
+## Cek indikator "menunggu lawan" (presence)
+
+Server sekarang kirim `{"type":"presence","count":N}` ke semua koneksi di room itu tiap kali ada
+yang connect/disconnect. Connect **Tab 1** doang ke room baru - harus muncul di console-nya:
+```
+TAB 1 dapet: {"type":"presence","count":1}
+```
+Baru connect **Tab 2** ke room yang sama - **kedua** tab harus dapet update:
+```
+TAB 1 dapet: {"type":"presence","count":2}
+TAB 2 dapet: {"type":"presence","count":2}
+```
+Tutup Tab 2 (close tab-nya beneran, bukan cuma pindah tab) - Tab 1 harus dapet lagi
+`{"type":"presence","count":1}` beberapa saat kemudian.
 
 ## Deploy ke Railway
 

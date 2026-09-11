@@ -36,9 +36,15 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 use tokio::sync::broadcast;
 use tower_http::cors::CorsLayer;
 
-/// Kode room -> saluran broadcast room itu. Dibikin on-demand pas
-/// koneksi pertama masuk ke suatu room (lihat `handle_socket`).
-type RoomChannels = Arc<Mutex<HashMap<String, broadcast::Sender<String>>>>;
+/// Kode room -> channel broadcast-nya + berapa koneksi yang lagi
+/// nempel. Dibikin on-demand pas koneksi pertama masuk ke suatu room
+/// (lihat `handle_socket`).
+struct RoomState {
+    tx: broadcast::Sender<String>,
+    count: usize,
+}
+
+type RoomChannels = Arc<Mutex<HashMap<String, RoomState>>>;
 
 #[derive(Clone)]
 struct AppState {
@@ -184,19 +190,25 @@ async fn ws_handler(
     ws.on_upgrade(move |socket| handle_socket(socket, code, state))
 }
 
-/// Nyambung ke saluran broadcast milik `code` (dibikin kalau belum ada),
-/// lalu jalanin dua arah sekaligus lewat dua task terpisah: satu
-/// nerusin pesan DARI saluran KE socket ini, satu lagi nerusin pesan
-/// DARI socket ini KE saluran - tapi sekarang lewat validasi dulu kalau
-/// bentuknya pesan "move" (lihat `validate_and_apply_move`).
+/// Nyambung ke channel broadcast milik `code` (dibikin kalau belum ada),
+/// naikin hitungan koneksi + broadcast presence, lalu jalanin dua arah
+/// sekaligus lewat dua task terpisah: satu nerusin pesan DARI channel
+/// KE socket ini, satu lagi nerusin pesan DARI socket ini KE channel -
+/// lewat validasi dulu kalau bentuknya pesan "move" (lihat
+/// `validate_move_if_applicable`). Pas koneksi ini tutup, hitungannya
+/// diturunin lagi + presence di-broadcast ulang.
 async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
     let tx = {
         let mut rooms = state.rooms.lock().unwrap();
-        rooms
-            .entry(code.clone())
-            .or_insert_with(|| broadcast::channel(100).0)
-            .clone()
+        let room = rooms.entry(code.clone()).or_insert_with(|| RoomState {
+            tx: broadcast::channel(100).0,
+            count: 0,
+        });
+        room.count += 1;
+        room.tx.clone()
     };
+    broadcast_presence(&state, &code);
+
     let mut rx = tx.subscribe();
 
     let (mut sender, mut receiver) = socket.split();
@@ -243,7 +255,26 @@ async fn handle_socket(socket: WebSocket, code: String, state: AppState) {
         _ = &mut recv_task => send_task.abort(),
     }
 
+    {
+        let mut rooms = state.rooms.lock().unwrap();
+        if let Some(room) = rooms.get_mut(&code) {
+            room.count = room.count.saturating_sub(1);
+        }
+    }
+    broadcast_presence(&state, &code);
+
     tracing::info!("koneksi ke room {code} ditutup");
+}
+
+/// Kirim `{"type":"presence","count":N}` ke semua koneksi di room ini -
+/// dipanggil tiap kali ada yang connect/disconnect, biar tiap client
+/// bisa nampilin "menunggu lawan" (count < 2) atau enggak.
+fn broadcast_presence(state: &AppState, code: &str) {
+    let rooms = state.rooms.lock().unwrap();
+    if let Some(room) = rooms.get(code) {
+        let msg = format!(r#"{{"type":"presence","count":{}}}"#, room.count);
+        let _ = room.tx.send(msg);
+    }
 }
 
 #[derive(Deserialize)]
