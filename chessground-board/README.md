@@ -174,6 +174,14 @@ Belum coba jalan? Build dulu `rules-wasm` sebelum `npm run dev` — lihat [`rule
   (`https://zetabit-production.up.railway.app`) - Play with Friend bisa dites dari device mana pun,
   gak perlu lagi komputer developer nyala `cargo run`.
 
+- **Reconnect**: kalau WebSocket putus (wifi hiccup, tab di-background di HP, dst), `FriendRoom.tsx`
+  otomatis coba sambung ulang tiap 2 detik sampai berhasil - gak perlu refresh manual. Tiap kali
+  koneksi kebuka (baru ATAU reconnect), client fetch FEN terkini dari `GET /rooms/:code` dan
+  nge-sync ulang papan ke situ (`useChessGame`'s `loadFen`) - jaga-jaga ada gerakan lawan yang
+  kelewat selagi terputus. Efek samping yang bagus: ini juga otomatis benerin kasus "buka link room
+  yang udah jalan lama" - dulu papannya reset ke posisi awal, sekarang langsung sinkron ke posisi
+  yang benar.
+
 ## Catatan TypeScript
 
 Import tipe di sini pakai `import type { Api, Config } from '@lichess-org/chessground'` (root package,
@@ -181,3 +189,10 @@ bukan subpath) — ini pola paling umum untuk package TS yang sudah matang. Kala
 `@lichess-org/chessground` yang ke-install tidak re-export nama itu dari root, TypeScript akan langsung
 kasih error "no exported member" yang jelas; cek `node_modules/@lichess-org/chessground/dist/*.d.ts` untuk
 path export yang benar dan sesuaikan importnya (biasanya jadi subpath seperti `@lichess-org/chessground/api`).
+
+## Design system = Ply (siap merge)
+
+Token, komponen `ui/*`, `theme-toggle`, dan header (`app-header.tsx`) disalin dari Ply supaya kedua proyek bisa digabung tanpa
+beda desain. Papan sage `#e8e4d6`/`#74876f`, tema gelap default, tombol pill, kartu `rounded-2xl`. Langkah setup ada di header
+`src/styles/ply-theme.css`. Import di komponen ini pakai path relatif (bukan `@/`), jadi gak perlu ubah vite/tsconfig.
+Halaman lama (Home/Game/Navbar) masih jalan lewat alias token di bagian bawah `ply-theme.css` - hapus setelah dirombak.

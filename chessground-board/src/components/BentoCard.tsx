@@ -1,58 +1,42 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { cn } from '../lib/utils';
 
-type Accent = 'lavender' | 'peach' | 'mint';
-
-interface BentoCardProps {
+interface Props {
   title: string;
   description: string;
   icon: ReactNode;
-  accent: Accent;
-  /** Larger card, meant for the one mode that's actually playable today. */
-  large?: boolean;
-  /** Present but not yet wired to anything real (no backend yet). */
-  comingSoon?: boolean;
   to?: string;
+  soon?: boolean;
+  className?: string;
 }
 
-export default function BentoCard({ title, description, icon, accent, large, comingSoon, to }: BentoCardProps) {
-  // Sets the --card-accent custom property the .bento-card / .bento-icon
-  // CSS (index.css) reads from - keeps this a plain, static Tailwind
-  // class list (accent-lavender/peach/mint would need per-value classes
-  // Tailwind can't see at build time since they'd be built dynamically).
-  const accentStyle = { '--card-accent': `var(--color-${accent})` } as CSSProperties;
-
-  const content = (
-    <div
-      style={accentStyle}
-      className={`bento-card relative flex h-full flex-col justify-between overflow-hidden rounded-3xl p-6 ${
-        comingSoon ? '' : 'is-active'
-      } ${large ? 'sm:p-8' : ''}`}
-    >
-      {comingSoon && (
-        <span className="absolute right-5 top-5 rounded-full border border-border px-2.5 py-1 text-xs text-text-secondary">
-          Segera hadir
-        </span>
-      )}
-
-      <div className={`bento-icon grid place-items-center rounded-2xl ${large ? 'h-12 w-12' : 'h-10 w-10'}`}>
+export default function BentoCard({ title, description, icon, to, soon, className }: Props) {
+  const body = (
+    <>
+      <span className="flex size-10 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)] [&_svg]:size-5">
         {icon}
+      </span>
+      <div className="mt-auto pt-8">
+        <div className="flex items-center gap-2">
+          <h3 className="font-display text-xl font-medium tracking-[-0.01em]">{title}</h3>
+          {soon && (
+            <span className="rounded-full border border-[var(--border-strong)] px-2 py-0.5 text-[11px] text-[var(--ink-muted)]">
+              Segera hadir
+            </span>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-[var(--ink-muted)]">{description}</p>
       </div>
-
-      <div className="mt-8">
-        <h3 className={`font-heading font-semibold text-text-primary ${large ? 'text-2xl' : 'text-lg'}`}>{title}</h3>
-        <p className={`mt-2 text-text-secondary ${large ? 'text-base' : 'text-sm'}`}>{description}</p>
-      </div>
-    </div>
+    </>
   );
-
-  if (comingSoon || !to) {
-    return <div className="h-full cursor-default opacity-90">{content}</div>;
+  const base = 'flex min-h-44 flex-col rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-5 transition';
+  if (!to || soon) {
+    return <div className={cn(base, soon && 'opacity-60', className)}>{body}</div>;
   }
-
   return (
-    <Link to={to} className="block h-full">
-      {content}
+    <Link to={to} className={cn(base, 'hover:border-[var(--accent)] hover:bg-[var(--bg-elevated-2)]', className)}>
+      {body}
     </Link>
   );
 }

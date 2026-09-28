@@ -42,19 +42,34 @@ export interface ChessGameState {
    * already in `dests`, but guards stale-dests edge cases safely. */
   tryMove: (orig: Key, dest: Key, promotion?: PromotionRole) => boolean;
   reset: () => void;
+  /** Replaces the current game with the position from `fen`. Used to
+   * resync with the server's authoritative state (e.g. after a
+   * WebSocket reconnect, in case moves happened while disconnected).
+   * Silently does nothing if `fen` is invalid or wasm isn't ready yet. */
+  loadFen: (fen: string) => void;
+  /** Non-null kalau rules engine (wasm) gagal dimuat. */
+  error: string | null;
 }
 
 // Module-level so every component sharing this hook waits on the same
 // load instead of re-fetching the .wasm file per mount.
 let wasmReady: Promise<unknown> | null = null;
 function loadWasm() {
-  if (!wasmReady) wasmReady = init();
+  // Kalau gagal (mis. .wasm gak ke-fetch), reset supaya mount berikutnya bisa
+  // coba lagi - bukan nyangkut selamanya di promise yang udah rejected.
+  if (!wasmReady) {
+    wasmReady = init().catch((e) => {
+      wasmReady = null;
+      throw e;
+    });
+  }
   return wasmReady;
 }
 
 export function useChessGame(): ChessGameState {
   const gameRef = useRef<Game | null>(null);
   const [snapshot, setSnapshot] = useState<StateSnapshot | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +78,8 @@ export function useChessGame(): ChessGameState {
       const game = new Game();
       gameRef.current = game;
       setSnapshot(game.state() as StateSnapshot);
+    }).catch(() => {
+      if (!cancelled) setError('Gagal memuat rules engine - coba muat ulang halaman.');
     });
     return () => {
       cancelled = true;
@@ -88,6 +105,17 @@ export function useChessGame(): ChessGameState {
     setSnapshot(game.state() as StateSnapshot);
   }, []);
 
+  const loadFen = useCallback((fen: string) => {
+    if (!gameRef.current) return; // wasm not loaded yet
+    try {
+      const game = Game.fromFen(fen);
+      gameRef.current = game;
+      setSnapshot(game.state() as StateSnapshot);
+    } catch {
+      // FEN gak valid - biarin state sekarang apa adanya daripada crash
+    }
+  }, []);
+
   const dests = useMemo(() => {
     if (!snapshot) return new Map<Key, Key[]>();
     return new Map(snapshot.dests as [Key, Key[]][]);
@@ -107,5 +135,7 @@ export function useChessGame(): ChessGameState {
     lastMove: snapshot?.lastMove ? (snapshot.lastMove as [Key, Key]) : undefined,
     tryMove,
     reset,
+    loadFen,
+    error,
   };
 }

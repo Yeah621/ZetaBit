@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import ChessBoard from '../components/ChessBoard';
+import { ArrowLeft, Check, Copy } from 'lucide-react';
+import { AppHeader } from '../components/app-header';
+import { ThemeToggle } from '../components/theme-toggle';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 import type { Config } from '@lichess-org/chessground/config';
 import type { Key } from '@lichess-org/chessground/types';
 import { useChessGame } from '../hooks/useChessGame';
@@ -8,6 +13,7 @@ import { BACKEND_URL } from '../config';
 
 type PromotionRole = 'q' | 'r' | 'b' | 'n';
 type Color = 'white' | 'black';
+type ConnState = 'connecting' | 'open' | 'down';
 
 interface MoveMessage {
   type: 'move';
@@ -24,137 +30,254 @@ interface PresenceMessage {
 
 type ServerMessage = MoveMessage | PresenceMessage;
 
+// crypto.randomUUID cuma ada di secure context (HTTPS/localhost). Lewat
+// http://IP-LAN dari HP dia undefined dan halaman langsung blank - makanya ada fallback.
+const makeId = () =>
+  globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+
+function PlayerStrip({ color, label, active }: { color: Color; label: string; active: boolean }) {
+  return (
+    <div className="flex h-8 items-center gap-2.5 px-1">
+      <span
+        className={`size-4 rounded-full border border-[var(--border-strong)] ${color === 'white' ? 'bg-[#f5f3ea]' : 'bg-[#1b1d25]'}`}
+        aria-hidden="true"
+      />
+      <span className="text-sm font-medium">{label}</span>
+      {active && (
+        <span className="ml-auto rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">
+          Giliran
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function FriendRoom() {
   const { code = '' } = useParams<{ code: string }>();
   const game = useChessGame();
+  const { ready, boardFen, turn, check, lastMove, dests, gameOver, tryMove, loadFen } = game;
   const wsRef = useRef<WebSocket | null>(null);
-  // 1 = cuma kamu, belum ada lawan. Server ngasih tau angka ini tiap
-  // ada yang connect/disconnect ke room ini (lihat pesan "presence").
-  const [connectedCount, setConnectedCount] = useState(1);
+  const [conn, setConn] = useState<ConnState>('connecting');
+  // null = server belum ngabarin siapa-siapa (jangan langsung bilang "menunggu lawan").
+  const [presence, setPresence] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  // Diisi FriendLobby.tsx pas create ('white') atau join ('black'), lewat
-  // sessionStorage biar reload tab yang sama masih inget - tapi kalau
-  // buka link room langsung tanpa lewat lobby (device baru, dsb), ini
-  // gak ada isinya. Default ke 'black' untuk kasus itu: yang paling
-  // umum adalah kamu diundang (join), bukan yang bikin room.
+  // Diisi FriendLobby.tsx pas create ('white') atau join ('black') lewat sessionStorage.
+  // Buka link room langsung tanpa lobby -> default 'black' (kasus paling umum: kamu diundang).
   const myColor = useMemo<Color>(
     () => (sessionStorage.getItem(`role:${code}`) as Color | null) ?? 'black',
     [code],
   );
 
-  // Id acak sekali per koneksi - dipakai buat nyaring gema pesan sendiri
-  // (broadcast di server ngirim ke SEMUA koneksi di room, termasuk yang
-  // ngirim). Tanpa ini, gerakan sendiri bakal ke-apply dua kali.
-  const clientId = useMemo(() => crypto.randomUUID(), []);
+  // Id acak per koneksi buat nyaring gema pesan sendiri (server broadcast ke SEMUA koneksi).
+  const clientId = useMemo(makeId, []);
+
+  // Samain papan ke FEN server. Dipanggil tiap socket kebuka (baru/reconnect) DAN pas
+  // wasm baru siap - kalau socket kebuka duluan, loadFen sebelumnya diam-diam gagal.
+  const resync = useCallback(() => {
+    fetch(`${BACKEND_URL}/rooms/${code}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((room: { fen?: string } | null) => {
+        if (room?.fen) loadFen(room.fen);
+      })
+      .catch(() => {
+        // gagal resync - biarin state lokal, jangan nge-block UI
+      });
+  }, [code, loadFen]);
 
   useEffect(() => {
-    const wsUrl = `${BACKEND_URL.replace(/^http/, 'ws')}/ws/${code}`;
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    let cancelled = false;
+    let attempt = 0;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    ws.onmessage = (event) => {
-      let msg: ServerMessage;
-      try {
-        msg = JSON.parse(event.data);
-      } catch {
-        return; // bukan JSON valid, abaikan
-      }
-      if (msg.type === 'presence') {
-        setConnectedCount(msg.count);
-        return;
-      }
-      if (msg.senderId === clientId) return; // gema pesan sendiri
-      if (msg.type === 'move') {
-        game.tryMove(msg.orig as Key, msg.dest as Key, msg.promotion ?? undefined);
+    const connect = () => {
+      if (cancelled) return;
+      setConn('connecting');
+      const ws = new WebSocket(`${BACKEND_URL.replace(/^http/, 'ws')}/ws/${code}`);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        attempt = 0;
+        setConn('open');
+        resync();
+      };
+
+      ws.onmessage = (event) => {
+        let msg: ServerMessage;
+        try {
+          msg = JSON.parse(event.data);
+        } catch {
+          return; // bukan JSON valid, abaikan
+        }
+        if (msg.type === 'presence') {
+          setPresence(msg.count);
+          return;
+        }
+        if (msg.senderId === clientId) return; // gema pesan sendiri
+        if (msg.type === 'move') {
+          tryMove(msg.orig as Key, msg.dest as Key, msg.promotion ?? undefined);
+        }
+      };
+
+      // Putus (wifi hiccup, tab di-background di HP) -> sambung ulang dengan backoff 1s-8s.
+      ws.onclose = () => {
+        if (cancelled || wsRef.current !== ws) return;
+        setConn('down');
+        setPresence(null);
+        retryTimeout = setTimeout(connect, Math.min(8000, 1000 * 2 ** attempt++));
+      };
+    };
+
+    // Balik online / tab dibuka lagi: gak usah nunggu timer, langsung coba.
+    const wake = () => {
+      if (document.visibilityState === 'hidden') return;
+      const ws = wsRef.current;
+      if (!ws || ws.readyState === WebSocket.CLOSED) {
+        clearTimeout(retryTimeout);
+        attempt = 0;
+        connect();
       }
     };
+
+    connect();
+    window.addEventListener('online', wake);
+    document.addEventListener('visibilitychange', wake);
 
     return () => {
-      ws.close();
+      cancelled = true;
+      clearTimeout(retryTimeout);
+      window.removeEventListener('online', wake);
+      document.removeEventListener('visibilitychange', wake);
+      wsRef.current?.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, clientId]);
+  }, [code, clientId, resync, tryMove]);
+
+  useEffect(() => {
+    if (ready && wsRef.current?.readyState === WebSocket.OPEN) resync();
+  }, [ready, resync]);
 
   const handleAfterMove = useCallback(
     (orig: Key, dest: Key) => {
-      const applied = game.tryMove(orig, dest);
-      if (applied) {
+      const ws = wsRef.current;
+      // Papan dikunci saat gak connect, jadi ini cuma jaring pengaman buat race
+      // tipis: jangan apply lokal kalau gak bisa dikirim, tarik balik ke FEN server.
+      if (ws?.readyState !== WebSocket.OPEN) {
+        resync();
+        return;
+      }
+      if (tryMove(orig, dest)) {
         const msg: MoveMessage = { type: 'move', orig, dest, promotion: null, senderId: clientId };
-        wsRef.current?.send(JSON.stringify(msg));
+        ws.send(JSON.stringify(msg));
       }
     },
-    [game.tryMove, clientId],
+    [tryMove, resync, clientId],
   );
 
-  // Beda dari Local Pass & Play: di situ `movable.color` ngikutin giliran
-  // (satu device gantian). Di sini `movable.color` DIKUNCI ke warna kamu
-  // sendiri sepanjang game - kamu emang gak boleh megang bidak lawan.
-  // Giliran lawan otomatis kekunci juga karena `dests` bakal kosong buat
-  // warna kamu selama bukan giliranmu (dari rules engine yang sama).
-  const config: Config = {
-    ...(game.boardFen !== undefined ? { fen: game.boardFen } : {}),
-    ...(game.turn !== undefined ? { turnColor: game.turn } : {}),
-    orientation: myColor,
-    check: game.check,
-    lastMove: game.lastMove,
-    movable: {
-      free: false,
-      dests: game.dests,
-      color: myColor,
-      showDests: true,
-      events: { after: handleAfterMove },
-    },
-  };
+  // `movable.color` DIKUNCI ke warna sendiri (bukan ngikutin giliran kayak Local Pass & Play).
+  // Selama belum connect / game selesai, papan read-only supaya gerakan gak "hilang" diam-diam.
+  const live = conn === 'open' && ready && !gameOver;
+  const config = useMemo<Config>(
+    () => ({
+      ...(boardFen !== undefined ? { fen: boardFen } : {}),
+      ...(turn !== undefined ? { turnColor: turn } : {}),
+      orientation: myColor,
+      check,
+      lastMove,
+      movable: {
+        free: false,
+        dests: live ? dests : new Map<Key, Key[]>(),
+        ...(live ? { color: myColor } : {}),
+        showDests: true,
+        events: { after: handleAfterMove },
+      },
+    }),
+    [boardFen, turn, check, lastMove, dests, live, myColor, handleAfterMove],
+  );
 
-  const resultText = game.checkmate
-    ? `Skakmat - ${game.turn === 'white' ? 'Hitam' : 'Putih'} menang`
+  const opponent: Color = myColor === 'white' ? 'black' : 'white';
+  const name = (c: Color) => (c === 'white' ? 'Putih' : 'Hitam');
+  const active = ready && !gameOver;
+
+  const result = game.checkmate
+    ? `Skakmat — ${turn === 'white' ? 'Hitam' : 'Putih'} menang`
     : game.stalemate
-      ? 'Stalemate - remis'
+      ? 'Stalemate — remis'
       : game.insufficientMaterial
-        ? 'Remis - sisa bidak tidak cukup'
+        ? 'Remis — sisa bidak tidak cukup'
         : null;
 
+  const status =
+    conn === 'down'
+      ? { ok: false, text: 'Terputus — menyambung ulang…' }
+      : conn === 'connecting' || presence === null
+        ? { ok: false, text: 'Menghubungkan…' }
+        : presence < 2
+          ? { ok: false, text: 'Menunggu lawan join — bagikan link room-nya.' }
+          : { ok: true, text: 'Lawan terhubung' };
+
+  const copyInvite = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/friend/${code}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // clipboard diblokir (mis. http non-secure) - abaikan
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-bg-base">
-      <header className="flex items-center px-6 py-5 sm:px-10">
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 rounded-full border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary shadow-sm transition hover:border-accent-dim active:scale-95"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          Home
-        </Link>
-      </header>
+    <div className="mx-auto flex min-h-dvh w-full max-w-[1400px] flex-col gap-6 px-4 py-5 sm:px-6 lg:px-10">
+      <AppHeader
+        subtitle={`Room ${code}`}
+        actions={
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/">
+                <ArrowLeft className="size-3.5" />
+                Home
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </>
+        }
+      />
 
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-6 pb-16 lg:flex-row lg:items-start lg:justify-center">
-        <div className="mx-auto w-full max-w-[560px] shrink-0 rounded-sm shadow-2xl ring-1 ring-black/40">
-          <div className="aspect-square w-full">
-            <ChessBoard config={config} />
+      <main className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="mx-auto flex w-full max-w-[640px] flex-col gap-3">
+          <PlayerStrip color={opponent} label={`Lawan · ${name(opponent)}`} active={active && turn === opponent} />
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
+            <div className="aspect-square w-full">
+              {ready ? <ChessBoard config={config} /> : <div className="shimmer h-full w-full" />}
+            </div>
           </div>
-        </div>
+          <PlayerStrip color={myColor} label={`Kamu · ${name(myColor)}`} active={active && turn === myColor} />
+        </section>
 
-        <aside className="flex w-full flex-col gap-4 lg:w-64">
-          <div className="glass-panel rounded-2xl px-5 py-4">
-            <p className="text-xs text-text-secondary">Kode room</p>
-            <p className="font-mono text-lg font-semibold tracking-widest text-text-primary">{code}</p>
-            <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+        <aside className="flex flex-col gap-5">
+          <Card className="p-4">
+            <p className="text-xs text-[var(--ink-muted)]">Kode room</p>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <span className="font-mono text-2xl font-medium tracking-[0.2em]">{code}</span>
+              <Button variant="outline" size="sm" onClick={copyInvite} aria-label="Salin link undangan">
+                {copied ? <Check /> : <Copy />}
+                {copied ? 'Tersalin' : 'Salin link'}
+              </Button>
+            </div>
+            <div role="status" aria-live="polite" className="mt-4 flex items-center gap-2 border-t border-[var(--border)] pt-3 text-sm">
               <span
-                className={`h-2.5 w-2.5 rounded-full ${myColor === 'white' ? 'bg-white ring-1 ring-border' : 'bg-hero-to'}`}
+                className={`size-2 shrink-0 rounded-full ${status.ok ? 'bg-[var(--felt)]' : 'animate-soft-pulse bg-[var(--warning)]'}`}
                 aria-hidden="true"
               />
-              <span className="text-sm text-text-primary">
-                Kamu: {myColor === 'white' ? 'Putih' : 'Hitam'}
-                {game.ready && connectedCount > 1 && game.turn === myColor && ' (giliranmu)'}
-              </span>
+              <span className="text-[var(--ink-muted)]">{status.text}</span>
             </div>
-            {connectedCount < 2 ? (
-              <p className="mt-2 text-sm text-peach">Menunggu lawan join... bagikan kode room-nya.</p>
-            ) : (
-              resultText && <p className="mt-2 text-sm font-medium text-accent">{resultText}</p>
-            )}
-          </div>
+          </Card>
+
+          {(result || game.error) && (
+            <Card role="status" className="p-4">
+              <p className="text-xs text-[var(--ink-muted)]">{game.error ? 'Error' : 'Hasil'}</p>
+              <p className="font-display mt-1 text-lg font-medium tracking-[-0.01em]">{game.error ?? result}</p>
+            </Card>
+          )}
         </aside>
       </main>
     </div>

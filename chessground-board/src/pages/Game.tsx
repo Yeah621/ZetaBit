@@ -1,116 +1,99 @@
-import { useCallback, useRef } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router';
-import ChessBoard, { type ChessBoardHandle } from '../components/ChessBoard';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
 import type { Config } from '@lichess-org/chessground/config';
 import type { Key } from '@lichess-org/chessground/types';
+import ChessBoard from '../components/ChessBoard';
+import { AppHeader } from '../components/app-header';
+import { ThemeToggle } from '../components/theme-toggle';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 import { useChessGame } from '../hooks/useChessGame';
 
-interface GameProps {
-  /** Only 'local' is wired up so far - 'friend' / 'ai' arrive with Fase 3-5,
-   * once there's a backend to actually run them against. */
-  mode: 'local';
-}
+export default function Game() {
+  const { ready, boardFen, turn, check, lastMove, dests, gameOver, checkmate, stalemate, insufficientMaterial, tryMove, reset } =
+    useChessGame();
+  const live = ready && !gameOver;
 
-export default function Game({ mode }: GameProps) {
-  const boardRef = useRef<ChessBoardHandle>(null);
-  const game = useChessGame();
-
-  const handleFlip = useCallback(() => {
-    boardRef.current?.toggleOrientation();
-  }, []);
-
-  const handleReset = useCallback(() => {
-    game.reset();
-  }, [game.reset]);
-
-  // Fase 1: Chessground now only offers squares that are actually in
-  // `dests` (movable.free: false below), so by the time this fires the
-  // move is already known-legal - just advance the real game state.
-  // Promotion always auto-queens for now; a picker UI is Phase 6.
-  const handleAfterMove = useCallback(
-    (orig: Key, dest: Key) => {
-      game.tryMove(orig, dest);
-    },
-    [game.tryMove],
+  // Pass & Play: movable.color ngikutin giliran (beda dari FriendRoom yang dikunci ke warna sendiri).
+  const config = useMemo<Config>(
+    () => ({
+      ...(boardFen !== undefined ? { fen: boardFen } : {}),
+      ...(turn !== undefined ? { turnColor: turn } : {}),
+      check,
+      lastMove,
+      movable: {
+        free: false,
+        dests: live ? dests : new Map<Key, Key[]>(),
+        ...(live && turn ? { color: turn } : {}),
+        showDests: true,
+        events: {
+          after: (orig: Key, dest: Key) => {
+            tryMove(orig, dest);
+          },
+        },
+      },
+    }),
+    [boardFen, turn, check, lastMove, dests, live, tryMove],
   );
 
-  // `fen` / `turnColor` / `movable.color` are only spread in once the
-  // wasm game has actually loaded (`game.ready`). Leaving them OUT
-  // entirely (rather than passing `fen: undefined`) matters on the first
-  // render: this object gets merged into ChessBoard's own defaults, and
-  // an explicit `undefined` would override those defaults instead of
-  // being ignored, briefly wiping the start position.
-  const config: Config = {
-    ...(game.boardFen !== undefined ? { fen: game.boardFen } : {}),
-    ...(game.turn !== undefined ? { turnColor: game.turn } : {}),
-    check: game.check,
-    lastMove: game.lastMove,
-    movable: {
-      free: false,
-      dests: game.dests,
-      ...(game.turn !== undefined ? { color: game.turn } : {}),
-      showDests: true,
-      events: { after: handleAfterMove },
-    },
-  };
-
-  const resultText = game.checkmate
-    ? `Skakmat - ${game.turn === 'white' ? 'Hitam' : 'Putih'} menang`
-    : game.stalemate
-      ? 'Stalemate - remis'
-      : game.insufficientMaterial
-        ? 'Remis - sisa bidak tidak cukup'
+  const who = turn === 'white' ? 'Putih' : 'Hitam';
+  const result = checkmate
+    ? `Skakmat — ${turn === 'white' ? 'Hitam' : 'Putih'} menang`
+    : stalemate
+      ? 'Stalemate — remis'
+      : insufficientMaterial
+        ? 'Remis — sisa bidak tidak cukup'
         : null;
 
-  const turnLabel = mode === 'local' ? (game.turn === 'white' ? 'Giliran Putih' : 'Giliran Hitam') : '';
-
   return (
-    <div className="min-h-screen bg-bg-base">
-      <header className="flex items-center px-6 py-5 sm:px-10">
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 rounded-full border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary shadow-sm transition hover:border-accent-dim active:scale-95"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          Home
-        </Link>
-      </header>
+    <div className="mx-auto flex min-h-dvh w-full max-w-[1400px] flex-col gap-6 px-4 py-5 sm:px-6 lg:px-10">
+      <AppHeader
+        subtitle="Pass & Play"
+        actions={
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/">
+                <ArrowLeft className="size-3.5" />
+                Home
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </>
+        }
+      />
 
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-6 pb-16 lg:flex-row lg:items-start lg:justify-center">
-        <div className="mx-auto w-full max-w-[560px] shrink-0 rounded-sm shadow-2xl ring-1 ring-black/40">
-          <div className="aspect-square w-full">
-            <ChessBoard ref={boardRef} config={config} />
-          </div>
-        </div>
-
-        <aside className="flex w-full flex-col gap-4 lg:w-64">
-          <div className="glass-panel rounded-2xl px-5 py-4">
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-2.5 w-2.5 rounded-full ${game.turn === 'white' ? 'bg-white ring-1 ring-border' : 'bg-hero-to'}`}
-                aria-hidden="true"
-              />
-              <span className="text-sm text-text-primary">{game.ready ? turnLabel : 'Memuat...'}</span>
+      <main className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="mx-auto w-full max-w-[640px]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
+            <div className="aspect-square w-full">
+              {ready ? <ChessBoard config={config} /> : <div className="shimmer h-full w-full" />}
             </div>
-            {resultText && <p className="mt-2 text-sm font-medium text-accent">{resultText}</p>}
           </div>
+        </section>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleFlip}
-              className="flex-1 rounded-xl border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary transition active:scale-95"
-            >
-              Flip board
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 rounded-xl border border-border px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary active:scale-95"
-            >
-              Reset
-            </button>
-          </div>
+        <aside className="flex flex-col gap-5">
+          <Card className="p-4" role="status" aria-live="polite">
+            <p className="text-xs text-[var(--ink-muted)]">{result ? 'Hasil' : 'Giliran'}</p>
+            {result ? (
+              <p className="font-display mt-1 text-lg font-medium tracking-[-0.01em]">{result}</p>
+            ) : (
+              <div className="mt-1 flex items-center gap-2.5">
+                <span
+                  className={`size-4 rounded-full border border-[var(--border-strong)] ${turn === 'white' ? 'bg-[#f5f3ea]' : 'bg-[#1b1d25]'}`}
+                  aria-hidden="true"
+                />
+                <span className="font-display text-lg font-medium tracking-[-0.01em]">{ready ? `${who} jalan` : 'Memuat…'}</span>
+                {check && (
+                  <span className="ml-auto rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">Skak</span>
+                )}
+              </div>
+            )}
+          </Card>
+          <Button onClick={reset} disabled={!ready} className="self-start">
+            <RotateCcw className="size-4" />
+            Game baru
+          </Button>
         </aside>
       </main>
     </div>

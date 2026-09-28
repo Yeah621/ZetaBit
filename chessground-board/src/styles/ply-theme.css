@@ -1,0 +1,254 @@
+/*
+ * Ply design system -> chessground-board (Vite + Tailwind v4).
+ * Isi utama = globals.css Ply apa adanya (token, base, shimmer, slider). Bagian bawah cuma
+ * penyesuaian Vite/Chessground + alias token lama.
+ *
+ * SETUP (sekali):
+ * 1) npm i framer-motion lucide-react class-variance-authority clsx tailwind-merge tailwindcss-animate \
+ *      @radix-ui/react-slot @radix-ui/react-dialog @radix-ui/react-tabs @radix-ui/react-label @radix-ui/react-tooltip
+ * 2) index.css, di bawah @import "tailwindcss":
+ *      @plugin "tailwindcss-animate";
+ *      @variant dark (&:is(.dark *));
+ * 3) main.tsx: import './styles/ply-theme.css' PALING TERAKHIR (setelah index.css & chessground-theme.css).
+ * 4) index.html <head> (font + anti-flash tema, sama persis dengan Ply):
+ *      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400..600&display=swap">
+ *      <script>try{var t=localStorage.getItem("chess-analysis-theme");t=t==="light"?"light":"dark";document.documentElement.classList.toggle("dark",t==="dark");document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.classList.add("dark")}</script>
+ */
+:root {
+  color-scheme: light;
+
+  --bg: #faf9f6;
+  --bg-elevated: #ffffff;
+  --bg-elevated-2: #f1efe8;
+  --bg-overlay: rgba(23, 22, 18, 0.45);
+  --ink: #18181b;
+  --ink-muted: #6b6d76;
+  --ink-faint: #9a9ca3;
+  --border: #e6e3da;
+  --border-strong: #d5d1c4;
+
+  --accent: #6d5ef0;
+  --accent-strong: #5a4bdb;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(109, 94, 240, 0.1);
+
+  --felt: #1e9e63;
+  --danger: #d33f3f;
+  --danger-soft: rgba(211, 63, 63, 0.1);
+  --warning: #c98a1f;
+
+  --last-move-tint: rgba(109, 94, 240, 0.22);
+  --select-tint: rgba(109, 94, 240, 0.32);
+  --legal-dot: rgba(30, 28, 20, 0.28);
+  --check-tint: rgba(211, 63, 63, 0.45);
+
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"],
+:root.dark {
+  color-scheme: dark;
+
+  --bg: #0c0d11;
+  --bg-elevated: #14151b;
+  --bg-elevated-2: #1b1d25;
+  --bg-overlay: rgba(5, 5, 8, 0.6);
+  --ink: #ecedf2;
+  --ink-muted: #93969f;
+  --ink-faint: #5b5e68;
+  --border: #23252e;
+  --border-strong: #2e313d;
+
+  --accent: #8b7cf6;
+  --accent-strong: #a396ff;
+  --accent-ink: #0c0d11;
+  --accent-soft: rgba(139, 124, 246, 0.16);
+
+  --felt: #34d399;
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.16);
+  --warning: #e8b339;
+
+  --last-move-tint: rgba(139, 124, 246, 0.24);
+  --select-tint: rgba(139, 124, 246, 0.36);
+  --legal-dot: rgba(236, 237, 242, 0.34);
+  --check-tint: rgba(239, 68, 68, 0.5);
+}
+
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Visible keyboard focus everywhere, styled with the accent rather than the
+   browser default blue, but never removed. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin, quiet scrollbars for the move list and dialog panels. */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.thin-scrollbar::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 999px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* A gentle shimmer for skeleton/loading placeholders (the board before its
+   first size measurement, the graph before analysis exists). */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--bg-elevated-2) 30%,
+    var(--border-strong) 45%,
+    var(--bg-elevated-2) 60%
+  );
+  background-size: 250% 100%;
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+/* Soft, slow pulse for "still analyzing this" affordances — deliberately
+   calmer than Tailwind's default animate-pulse. */
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.animate-soft-pulse {
+  animation: soft-pulse 1.8s ease-in-out infinite;
+}
+
+/* Board-size slider (board-controls.tsx) — a plain <input type="range">
+   restyled to match the app's own tokens rather than each browser's
+   default widget; -webkit-/-moz- rules must stay in separate rule blocks
+   since a browser drops an entire selector list it doesn't recognize. */
+.board-size-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+  cursor: pointer;
+}
+.board-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.board-size-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.board-size-slider:disabled::-webkit-slider-thumb {
+  background: var(--ink-faint);
+}
+.board-size-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--bg-elevated);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.board-size-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+.board-size-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+/* ---- Penyesuaian Vite (next/font di Ply -> Google Fonts di sini) ---- */
+:root {
+  --font-fraunces: 'Fraunces';
+  --font-inter: 'Inter';
+  --font-jetbrains-mono: 'JetBrains Mono';
+  --font-display: var(--font-fraunces), 'Iowan Old Style', serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SFMono-Regular', monospace;
+}
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+/* ---- Papan: warna sama dengan Ply. html:root menang atas :root di chessground-theme.css ---- */
+html:root {
+  --board-light: #e8e4d6;
+  --board-dark: #74876f;
+}
+.cg-wrap cg-board square.last-move { background-color: var(--last-move-tint); }
+.cg-wrap cg-board square.selected { background-color: var(--select-tint); }
+.cg-wrap cg-board square.move-dest { background: radial-gradient(circle, var(--legal-dot) 17%, transparent 19%); }
+.cg-wrap cg-board square.move-dest.oc {
+  background: radial-gradient(circle, transparent 56%, var(--legal-dot) 59%, var(--legal-dot) 65%, transparent 68%);
+}
+.cg-wrap cg-board square.move-dest:hover { background: var(--select-tint); }
+.cg-wrap cg-board square.check { background: none; box-shadow: inset 0 0 0 9999px var(--check-tint); }
+
+/* ---- Alias token lama (Home/Game/Navbar/BentoCard) - hapus setelah halaman itu dirombak ---- */
+:root {
+  --color-bg-base: var(--bg);
+  --color-bg-raised: var(--bg-elevated);
+  --color-border: var(--border);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-strong);
+  --color-hero-to: var(--bg-elevated-2);
+  --color-peach: var(--warning);
+}
