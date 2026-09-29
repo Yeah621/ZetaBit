@@ -1,10 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Chessground } from '@lichess-org/chessground';
-import type { Api } from '@lichess-org/chessground';
 import type { Config } from '@lichess-org/chessground/config';
 // Ganti baris di bawah buat pakai piece set lain (lihat README bagian "Mengganti piece set").
 import '@lichess-org/chessground/assets/chessground.base.css';
 import '@lichess-org/chessground/assets/chessground.cburnett.css';
+
+// `Api` gak di-export dari entry utama package (TS2459) - diturunkan dari return type Chessground().
+type Api = ReturnType<typeof Chessground>;
 
 export interface ChessBoardHandle {
   toggleOrientation: () => void;
