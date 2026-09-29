@@ -6,6 +6,7 @@ import { AppHeader } from '../components/app-header';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { NotationPanel } from '../components/NotationPanel';
 import type { Config } from '@lichess-org/chessground/config';
 import type { Key } from '@lichess-org/chessground/types';
 import { useChessGame } from '../hooks/useChessGame';
@@ -77,8 +78,9 @@ export default function FriendRoom() {
   const resync = useCallback(() => {
     fetch(`${BACKEND_URL}/rooms/${code}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((room: { fen?: string } | null) => {
-        if (room?.fen) loadFen(room.fen);
+      .then((room: { fen?: string; moves?: string[] } | null) => {
+        // `moves` (UCI) opsional - kalau backend sudah ngirim, notasi/PGN pulih utuh walau reload.
+        if (room?.fen) loadFen(room.fen, room.moves);
       })
       .catch(() => {
         // gagal resync - biarin state lokal, jangan nge-block UI
@@ -278,6 +280,8 @@ export default function FriendRoom() {
               <p className="font-display mt-1 text-lg font-medium tracking-[-0.01em]">{game.error ?? result}</p>
             </Card>
           )}
+
+          <NotationPanel moveHistory={game.moveHistory} pgn={game.pgn} fileName={`friend-${code}`} />
         </aside>
       </main>
     </div>

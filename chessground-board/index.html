@@ -3,15 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZetaBit Chess</title>
-
-    <!-- Poppins (headings) + Inter (body) + IBM Plex Mono (notation/clocks) -->
+    <title>Chessground Board</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@700;800;900&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400..600&display=swap"
     />
+    <script>
+      // Anti-flash tema: set class/attr SEBELUM React mount, baca key yang sama dengan
+      // theme-toggle.tsx ('chess-analysis-theme'). Default gelap kalau belum pernah diset.
+      try {
+        var t = localStorage.getItem('chess-analysis-theme');
+        t = t === 'light' ? 'light' : 'dark';
+        document.documentElement.classList.toggle('dark', t === 'dark');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

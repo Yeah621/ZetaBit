@@ -1,103 +1,105 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { AppHeader } from '../components/app-header';
+import { ThemeToggle } from '../components/theme-toggle';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
 import { BACKEND_URL } from '../config';
 
-interface RoomResponse {
-  code: string;
-}
+type Status = 'idle' | 'working';
 
 export default function FriendLobby() {
   const navigate = useNavigate();
   const [joinCode, setJoinCode] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
 
-  const createRoom = useCallback(async () => {
-    setBusy(true);
+  // ASUMSI yang belum terverifikasi ke backend asli: POST /rooms mengembalikan JSON
+  // berbentuk { code: string }. Bentuk pasti responsnya gak ada di file yang aku terima -
+  // kalau field-nya beda (mis. "roomCode" atau "id"), tinggal ganti "room.code" di bawah.
+  const createRoom = async () => {
+    setStatus('working');
     setError(null);
     try {
       const res = await fetch(`${BACKEND_URL}/rooms`, { method: 'POST' });
-      if (!res.ok) throw new Error('gagal bikin room');
-      const room = (await res.json()) as RoomResponse;
+      if (!res.ok) throw new Error();
+      const room: { code: string } = await res.json();
       sessionStorage.setItem(`role:${room.code}`, 'white');
       navigate(`/friend/${room.code}`);
     } catch {
-      setError('Gagal terhubung ke server. Pastikan backend-nya nyala (cargo run).');
-    } finally {
-      setBusy(false);
+      setError('Gagal membuat room. Coba lagi.');
+      setStatus('idle');
     }
-  }, [navigate]);
+  };
 
-  const joinRoom = useCallback(async () => {
+  const joinRoom = async () => {
     const code = joinCode.trim().toUpperCase();
     if (!code) return;
-    setBusy(true);
+    setStatus('working');
     setError(null);
     try {
+      // Dicek dulu ke GET /rooms/:code (dipakai juga oleh FriendRoom buat resync) supaya
+      // kode yang salah ketik ketahuan di sini, bukan di room yang gagal konek.
       const res = await fetch(`${BACKEND_URL}/rooms/${code}`);
-      if (res.status === 404) {
-        setError('Kode room gak ketemu. Cek lagi kodenya.');
-        return;
-      }
-      if (!res.ok) throw new Error('gagal cari room');
+      if (!res.ok) throw new Error();
       sessionStorage.setItem(`role:${code}`, 'black');
       navigate(`/friend/${code}`);
     } catch {
-      setError('Gagal terhubung ke server. Pastikan backend-nya nyala (cargo run).');
-    } finally {
-      setBusy(false);
+      setError('Room tidak ditemukan. Cek lagi kodenya.');
+      setStatus('idle');
     }
-  }, [joinCode, navigate]);
+  };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-bg-base px-6">
-      <Link to="/" className="fixed left-6 top-5 flex items-center gap-1.5 rounded-full border border-border bg-bg-raised px-4 py-2 text-sm font-medium text-text-primary shadow-sm transition hover:border-accent-dim">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        Home
-      </Link>
+    <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col gap-6 px-4 py-5 sm:px-6">
+      <AppHeader
+        subtitle="Main dengan teman"
+        actions={
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/">
+                <ArrowLeft className="size-3.5" />
+                Home
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </>
+        }
+      />
 
-      <div className="w-full max-w-sm">
-        <h1 className="font-heading text-center text-2xl font-bold text-text-primary">Play with Friend</h1>
-        <p className="mt-2 text-center text-sm text-text-secondary">
-          Buat room baru dan kirim kodenya ke teman, atau masukkan kode yang udah kamu punya.
-        </p>
+      <Card className="flex flex-col gap-3 p-5">
+        <h2 className="font-display text-lg font-medium tracking-[-0.01em]">Buat room baru</h2>
+        <p className="text-sm text-[var(--ink-muted)]">Kamu main sebagai Putih. Bagikan kodenya ke teman.</p>
+        <Button onClick={createRoom} disabled={status === 'working'} className="self-start">
+          {status === 'working' && <Loader2 className="size-4 animate-spin" />}
+          Buat room
+        </Button>
+      </Card>
 
-        <button
-          onClick={createRoom}
-          disabled={busy}
-          className="btn-gold mt-8 w-full rounded-xl px-6 py-3 text-sm font-heading font-semibold disabled:opacity-60"
-        >
-          {busy ? 'Memproses...' : 'Buat Room Baru'}
-        </button>
-
-        <div className="my-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-xs text-text-secondary">ATAU</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
+      <Card className="flex flex-col gap-3 p-5">
+        <h2 className="font-display text-lg font-medium tracking-[-0.01em]">Gabung pakai kode</h2>
+        <p className="text-sm text-[var(--ink-muted)]">Kamu main sebagai Hitam.</p>
         <div className="flex gap-2">
-          <input
+          <Input
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
             placeholder="Kode room"
-            maxLength={6}
-            className="w-full rounded-xl border border-border bg-bg-raised px-4 py-3 text-center font-mono uppercase tracking-widest text-text-primary outline-none focus:border-accent-dim"
+            className="font-mono uppercase tracking-[0.2em]"
+            maxLength={8}
           />
-          <button
-            onClick={joinRoom}
-            disabled={busy || !joinCode.trim()}
-            className="shrink-0 rounded-xl border border-border bg-bg-raised px-5 py-3 text-sm font-semibold text-text-primary transition hover:border-accent-dim disabled:opacity-60"
-          >
+          <Button onClick={joinRoom} disabled={status === 'working' || !joinCode.trim()}>
             Gabung
-          </button>
+          </Button>
         </div>
+      </Card>
 
-        {error && <p className="mt-4 text-center text-sm text-peach">{error}</p>}
-      </div>
+      {error && (
+        <p role="alert" className="text-sm text-[var(--danger)]">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

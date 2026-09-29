@@ -8,11 +8,26 @@ import { AppHeader } from '../components/app-header';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import { NotationPanel } from '../components/NotationPanel';
 import { useChessGame } from '../hooks/useChessGame';
 
 export default function Game() {
-  const { ready, boardFen, turn, check, lastMove, dests, gameOver, checkmate, stalemate, insufficientMaterial, tryMove, reset } =
-    useChessGame();
+  const {
+    ready,
+    boardFen,
+    turn,
+    check,
+    lastMove,
+    dests,
+    gameOver,
+    checkmate,
+    stalemate,
+    insufficientMaterial,
+    tryMove,
+    reset,
+    moveHistory,
+    pgn,
+  } = useChessGame();
   const live = ready && !gameOver;
 
   // Pass & Play: movable.color ngikutin giliran (beda dari FriendRoom yang dikunci ke warna sendiri).
@@ -94,6 +109,7 @@ export default function Game() {
             <RotateCcw className="size-4" />
             Game baru
           </Button>
+          <NotationPanel moveHistory={moveHistory} pgn={pgn} fileName="pass-and-play" />
         </aside>
       </main>
     </div>

@@ -190,6 +190,46 @@ bukan subpath) — ini pola paling umum untuk package TS yang sudah matang. Kala
 kasih error "no exported member" yang jelas; cek `node_modules/@lichess-org/chessground/dist/*.d.ts` untuk
 path export yang benar dan sesuaikan importnya (biasanya jadi subpath seperti `@lichess-org/chessground/api`).
 
+## Rekonstruksi (baca ini dulu)
+
+Yang benar-benar asli dari project kamu cuma 3 file: `README.md` ini, `hooks/useChessGame.ts`, dan
+`pages/FriendRoom.tsx`. Semua file lain di zip ini (`ChessBoard.tsx`, `App.tsx`, `main.tsx`, `config.ts`,
+`FriendLobby.tsx`, `Home.tsx`, `Game.tsx`, `Navbar.tsx`, `BentoCard.tsx`, styles, `package.json`,
+`vite.config.ts`, `index.html`, tsconfig) aku tulis ulang dari nol berdasarkan dokumentasi di README ini +
+pola dari 2 file asli itu - bukan salinan file kamu yang hilang. Sebelum `npm install`, cek 3 hal ini:
+
+1. **Bentuk respons `POST /rooms`** - `FriendLobby.tsx` asumsi baliknya `{ code: string }`. Kalau field
+   backend-mu beda namanya, tinggal ganti satu baris (ditandai komentar `ASUMSI` di file itu).
+2. **Posisi koordinat a-h/1-8** - `chessground-theme.css` sekarang pakai posisi default Chessground
+   (agak mengambang di tepi papan), BUKAN versi "nempel pojok kotak" yang disebut di bagian Fase 2 di
+   bawah - struktur DOM custom-nya gak ada di file yang aku terima, jadi daripada nebak dan salah total,
+   aku pakai default dulu.
+3. **`src/wasm/`** - ini tetap harus di-build sendiri dari `rules-wasm` (lihat "Rules engine" di bawah),
+   sama seperti sebelumnya. Bukan sesuatu yang "hilang", memang dari awal ada di luar zip ini.
+
+Versi paket di `package.json` pakai `^` (rentang semver terbaru yang aku tahu) - kalau `npm install`
+komplain, longgarkan angkanya.
+
+## Notasi & PGN
+
+Home, `/local`, dan FriendRoom sekarang punya kartu "Notasi" (daftar langkah dua kolom) + tombol download `.pgn`.
+`useChessGame` mengekspos `moveHistory` (SAN) dan `pgn`, dijaga instance `chess.js` terpisah yang cuma meniru
+move yang sudah lolos rules-wasm - jadi legalitas tetap 100% urusan WASM. `chess.js` ditambah ke `package.json`.
+
+- PGN otomatis terisi tag `Result` (1-0 / 0-1 / 1/2-1/2) begitu game selesai.
+- **FriendRoom & reconnect:** waktu resync, notasi dipulihkan berurutan: (1) kalau backend mengirim `moves`
+  (UCI) di `GET /rooms/:code`, dibangun ulang utuh dari situ; (2) kalau posisi server sama dengan yang sudah
+  dicatat, dibiarkan; (3) kalau selisih <= 2 ply (mis. 1 langkah lawan yang kelewat saat offline), langkahnya
+  dicari dan ditambal - di kasus transposisi yang langka urutannya bisa beda dari aslinya; (4) kalau gak bisa,
+  daftar langkah mulai kosong dari posisi itu. **Reload halaman** (mis. tab HP di-refresh) tetap kena (4)
+  sampai backend mengirim `moves`, karena state notasi cuma ada di memori browser. Pass & Play lokal tidak kena.
+- **Perubahan backend yang dibutuhkan** (belum dikerjakan - source backend tidak ada di zip): simpan daftar
+  langkah per room dan kembalikan di `GET /rooms/:code`, mis. `{ "fen": "...", "moves": ["e2e4", "e7e5", "g1f3"] }`
+  (UCI: `orig + dest + promosi`, contoh `e7e8q`). Server sudah menerima `orig`/`dest`/`promotion` di tiap pesan
+  `move`, jadi cukup di-append ke list per room. Client sudah siap memakainya (`loadFen(fen, moves)`).
+- Draw selain stalemate/insufficient material (mis. threefold) ditulis `1/2-1/2` sebagai default, karena
+  snapshot WASM tidak mengekspos flag khusus untuk itu.
+
 ## Design system = Ply (siap merge)
 
 Token, komponen `ui/*`, `theme-toggle`, dan header (`app-header.tsx`) disalin dari Ply supaya kedua proyek bisa digabung tanpa

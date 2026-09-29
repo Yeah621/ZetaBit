@@ -1,57 +1,160 @@
+import { useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, Bot, Globe, Users } from 'lucide-react';
+import { Bot, ChevronRight, Globe, RotateCcw, Users } from 'lucide-react';
 import type { Config } from '@lichess-org/chessground/config';
+import type { Key } from '@lichess-org/chessground/types';
 import ChessBoard from '../components/ChessBoard';
-import BentoCard from '../components/BentoCard';
 import Navbar from '../components/Navbar';
 import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { NotationPanel } from '../components/NotationPanel';
+import { useChessGame } from '../hooks/useChessGame';
 
-const preview: Config = {
-  fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R',
-  lastMove: ['g8', 'f6'],
-  viewOnly: true,
-};
+// Baris satu mode main, gaya menu "Play" Lichess/panel "New Game" Chess.com: ikon + judul +
+// subjudul + status di kanan (aktif / panah / "segera"), bukan kartu bento kotak-kotak.
+function ModeRow({
+  icon,
+  title,
+  subtitle,
+  to,
+  active,
+  disabled,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+  to?: string;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  const row = (
+    <>
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)] [&_svg]:size-4">
+        {icon}
+      </span>
+      <span className="flex flex-col">
+        <span className="text-sm font-medium">{title}</span>
+        <span className="text-xs text-[var(--ink-muted)]">{subtitle}</span>
+      </span>
+      {active && (
+        <span className="ml-auto shrink-0 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">
+          Sedang main
+        </span>
+      )}
+      {disabled && <span className="ml-auto shrink-0 text-xs text-[var(--ink-faint)]">Segera</span>}
+      {!active && !disabled && <ChevronRight className="ml-auto size-4 shrink-0 text-[var(--ink-faint)]" />}
+    </>
+  );
+  const cls = 'flex items-center gap-3 px-4 py-3.5 text-left transition';
+  if (to) {
+    return (
+      <Link to={to} className={`${cls} hover:bg-[var(--bg-elevated-2)]`}>
+        {row}
+      </Link>
+    );
+  }
+  return <div className={`${cls} ${disabled ? 'opacity-50' : 'bg-[var(--bg-elevated-2)]'}`}>{row}</div>;
+}
 
+// Home = papan + menu "mau main apa", sama kayak panel Play Lichess / New Game Chess.com -
+// bukan landing page. Board-nya sendiri Pass & Play beneran (wiring mirip Game.tsx - lihat
+// catatan duplikasi kecil di situ), karena itu opsi yang aktif begitu buka halaman.
 export default function Home() {
+  const {
+    ready,
+    boardFen,
+    turn,
+    check,
+    lastMove,
+    dests,
+    gameOver,
+    checkmate,
+    stalemate,
+    insufficientMaterial,
+    tryMove,
+    reset,
+    moveHistory,
+    pgn,
+  } = useChessGame();
+  const live = ready && !gameOver;
+
+  const config = useMemo<Config>(
+    () => ({
+      ...(boardFen !== undefined ? { fen: boardFen } : {}),
+      ...(turn !== undefined ? { turnColor: turn } : {}),
+      check,
+      lastMove,
+      movable: {
+        free: false,
+        dests: live ? dests : new Map<Key, Key[]>(),
+        ...(live && turn ? { color: turn } : {}),
+        showDests: true,
+        events: {
+          after: (orig: Key, dest: Key) => {
+            tryMove(orig, dest);
+          },
+        },
+      },
+    }),
+    [boardFen, turn, check, lastMove, dests, live, tryMove],
+  );
+
+  const who = turn === 'white' ? 'Putih' : 'Hitam';
+  const result = checkmate
+    ? `Skakmat — ${turn === 'white' ? 'Hitam' : 'Putih'} menang`
+    : stalemate
+      ? 'Stalemate — remis'
+      : insufficientMaterial
+        ? 'Remis — sisa bidak tidak cukup'
+        : null;
+
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[1200px] flex-col gap-10 px-4 py-5 sm:px-6 lg:px-10">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[1400px] flex-col gap-6 px-4 py-5 sm:px-6 lg:px-10">
       <Navbar />
 
-      <section className="grid items-center gap-10 lg:grid-cols-[1fr_minmax(0,460px)]">
-        <div className="flex flex-col items-start gap-5">
-          <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
-            Gratis · Tanpa perlu akun
-          </span>
-          <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
-            Main catur langsung di browser.
-          </h1>
-          <p className="max-w-[46ch] text-base text-[var(--ink-muted)]">
-            Satu layar berdua, atau kirim link room ke teman di device lain. Aturan dan sinkronisasi jalan real-time.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/local">
-                Main sekarang <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/friend">Main dengan teman</Link>
-            </Button>
+      <main className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="mx-auto w-full max-w-[640px]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
+            <div className="aspect-square w-full">
+              {ready ? <ChessBoard config={config} /> : <div className="shimmer h-full w-full" />}
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mx-auto w-full max-w-[460px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
-          <div className="aspect-square w-full">
-            <ChessBoard config={preview} />
-          </div>
-        </div>
-      </section>
+        <aside className="flex flex-col gap-5">
+          <Card className="overflow-hidden">
+            <p className="px-4 pb-2 pt-4 text-xs text-[var(--ink-muted)]">Main</p>
+            <div className="flex flex-col divide-y divide-[var(--border)] border-t border-[var(--border)]">
+              <ModeRow icon={<Users />} title="Main Lokal" subtitle="Satu layar, dua pemain" active />
+              <ModeRow icon={<Globe />} title="Main dengan Teman" subtitle="Buat atau gabung room" to="/friend" />
+              <ModeRow icon={<Bot />} title="Lawan Komputer" subtitle="Latihan lawan bot" disabled />
+            </div>
+          </Card>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <BentoCard to="/local" icon={<Users />} title="Pass & Play" description="Dua pemain, satu layar. Giliran ganti otomatis." />
-        <BentoCard to="/friend" icon={<Globe />} title="Main dengan teman" description="Buat room, bagikan kode, main real-time dari device berbeda." />
-        <BentoCard soon icon={<Bot />} title="Lawan AI" description="Latihan lawan bot dengan level yang bisa diatur." />
-      </section>
+          <Card className="p-4" role="status" aria-live="polite">
+            <p className="text-xs text-[var(--ink-muted)]">{result ? 'Hasil' : 'Giliran'}</p>
+            {result ? (
+              <p className="font-display mt-1 text-lg font-medium tracking-[-0.01em]">{result}</p>
+            ) : (
+              <div className="mt-1 flex items-center gap-2.5">
+                <span
+                  className={`size-4 rounded-full border border-[var(--border-strong)] ${turn === 'white' ? 'bg-[#f5f3ea]' : 'bg-[#1b1d25]'}`}
+                  aria-hidden="true"
+                />
+                <span className="font-display text-lg font-medium tracking-[-0.01em]">{ready ? `${who} jalan` : 'Memuat…'}</span>
+                {check && (
+                  <span className="ml-auto rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">Skak</span>
+                )}
+              </div>
+            )}
+          </Card>
+          <Button onClick={reset} disabled={!ready} variant="outline" size="sm" className="self-start">
+            <RotateCcw className="size-4" />
+            Game baru
+          </Button>
+          <NotationPanel moveHistory={moveHistory} pgn={pgn} fileName="pass-and-play" />
+        </aside>
+      </main>
     </div>
   );
 }
