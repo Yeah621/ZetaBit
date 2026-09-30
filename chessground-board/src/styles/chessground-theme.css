@@ -12,21 +12,17 @@
    Trik: satu ubin conic-gradient 2x2 (terang-gelap / gelap-terang) diulang 4x4 lewat
    background-size 25% -> total 8x8, tajam di ukuran berapa pun (bukan file gambar). */
 cg-board {
+  /* conic-gradient mulai dari jam 12 searah jarum jam: 0-90deg = kanan-atas, 90-180 = kanan-bawah,
+     180-270 = kiri-bawah, 270-360 = kiri-atas. Ubin 2x2 harus: kiri-atas TERANG, kanan-atas gelap,
+     kiri-bawah gelap, kanan-bawah terang - supaya a1 (kiri-bawah) gelap dan h1 (kanan-bawah) terang. */
   background-image: conic-gradient(
-    var(--board-light) 90deg,
-    var(--board-dark) 90deg 180deg,
-    var(--board-light) 180deg 270deg,
-    var(--board-dark) 270deg
+    var(--board-dark) 90deg,
+    var(--board-light) 90deg 180deg,
+    var(--board-dark) 180deg 270deg,
+    var(--board-light) 270deg
   );
   background-size: 25% 25%;
 }
 
-/* Simplifikasi vs versi lama: ini posisi DEFAULT Chessground (agak mengambang di tepi
-   papan), bukan custom "nempel pojok kotak" yang disebut README - struktur DOM persisnya
-   gak ada di file yang aku terima, jadi daripada nebak selector yang mungkin salah total,
-   aku warnain aja defaultnya. Kirim screenshot referensi kalau versi nempel-pojok itu penting. */
-coords {
-  color: var(--ink-muted, var(--board-dark));
-  font-size: 10px;
-  font-family: var(--ply-sans, inherit);
-}
+/* Koordinat a-h/1-8 digambar sendiri oleh ChessBoard.tsx (di dalam kotak tepi), bukan oleh Chessground
+   (`coordinates: false`), jadi tidak ada styling koordinat di sini. */

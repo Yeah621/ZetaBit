@@ -15,8 +15,11 @@ function triggerDownload(pgn: string, fileName: string) {
   const a = document.createElement('a');
   a.href = url;
   a.download = `${fileName}.pgn`;
+  document.body.appendChild(a); // Firefox lama butuh anchor ada di DOM
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  // Jangan di-revoke sinkron: sebagian browser (Safari/Firefox) baru mulai mengunduh setelah click selesai.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // Notasi dua-kolom (nomor | putih | hitam) ala Lichess/Chess.com + tombol download .pgn.

@@ -230,12 +230,23 @@ body {
 html:root {
   --board-light: #e8e4d6;
   --board-dark: #74876f;
+  --board-dot: rgba(18, 22, 14, 0.42);
+  --board-premove: rgba(45, 75, 190, 0.5);
+  --board-premove-dot: rgba(45, 75, 190, 0.62);
 }
 .cg-wrap cg-board square.last-move { background-color: var(--last-move-tint); }
 .cg-wrap cg-board square.selected { background-color: var(--select-tint); }
-.cg-wrap cg-board square.move-dest { background: radial-gradient(circle, var(--legal-dot) 17%, transparent 19%); }
+/* Titik legal move: warna GELAP tetap di kedua tema. Papan punya palet sendiri yang terang di dark
+   mode juga, jadi --legal-dot (pucat di tema gelap) hampir gak kelihatan di kotak terang. */
+.cg-wrap cg-board square.move-dest { background: radial-gradient(circle, var(--board-dot) 23%, transparent 25%); }
 .cg-wrap cg-board square.move-dest.oc {
-  background: radial-gradient(circle, transparent 56%, var(--legal-dot) 59%, var(--legal-dot) 65%, transparent 68%);
+  background: radial-gradient(circle, transparent 54%, var(--board-dot) 56%, var(--board-dot) 68%, transparent 70%);
+}
+/* Premove: biru, supaya beda dari last-move/selected (aksen) dan titik legal move (gelap). */
+.cg-wrap cg-board square.current-premove { background-color: var(--board-premove); }
+.cg-wrap cg-board square.premove-dest { background: radial-gradient(circle, var(--board-premove-dot) 23%, transparent 25%); }
+.cg-wrap cg-board square.premove-dest.oc {
+  background: radial-gradient(circle, transparent 54%, var(--board-premove-dot) 56%, var(--board-premove-dot) 68%, transparent 70%);
 }
 .cg-wrap cg-board square.move-dest:hover { background: var(--select-tint); }
 .cg-wrap cg-board square.check { background: none; box-shadow: inset 0 0 0 9999px var(--check-tint); }

@@ -200,10 +200,7 @@ pola dari 2 file asli itu - bukan salinan file kamu yang hilang. Sebelum `npm in
 
 1. **Bentuk respons `POST /rooms`** - `FriendLobby.tsx` asumsi baliknya `{ code: string }`. Kalau field
    backend-mu beda namanya, tinggal ganti satu baris (ditandai komentar `ASUMSI` di file itu).
-2. **Posisi koordinat a-h/1-8** - `chessground-theme.css` sekarang pakai posisi default Chessground
-   (agak mengambang di tepi papan), BUKAN versi "nempel pojok kotak" yang disebut di bagian Fase 2 di
-   bawah - struktur DOM custom-nya gak ada di file yang aku terima, jadi daripada nebak dan salah total,
-   aku pakai default dulu.
+2. ~~Posisi koordinat a-h/1-8~~ - sekarang digambar sendiri di dalam kotak tepi (lihat "Catatan hasil verifikasi").
 3. **`src/wasm/`** - ini tetap harus di-build sendiri dari `rules-wasm` (lihat "Rules engine" di bawah),
    sama seperti sebelumnya. Bukan sesuatu yang "hilang", memang dari awal ada di luar zip ini.
 
@@ -229,6 +226,45 @@ move yang sudah lolos rules-wasm - jadi legalitas tetap 100% urusan WASM. `chess
   `move`, jadi cukup di-append ke list per room. Client sudah siap memakainya (`loadFen(fen, moves)`).
 - Draw selain stalemate/insufficient material (mis. threefold) ditulis `1/2-1/2` sebagai default, karena
   snapshot WASM tidak mengekspos flag khusus untuk itu.
+
+## Kontrol papan: ukuran, panah, titik legal move
+
+`components/BoardFrame.tsx` membungkus papan + kontrolnya dan dipakai Home, `/local`, dan FriendRoom.
+
+- **Ukuran:** slider 60%-140% (dasar 640px, step 5%) + tombol -/+, tersimpan di localStorage
+  (`chess-board-scale`). Pola dan CSS `.board-size-slider` diambil dari Ply. Di layar sempit papan tetap
+  dibatasi lebar kolom, jadi efeknya terasa di desktop.
+- **Panah & penanda kotak:** digambar sendiri lewat layer SVG di atas papan (`ChessBoard.tsx`), bukan
+  `drawable` bawaan Chessground (dimatikan), karena bawaannya cuma garis lurus. Panah mengikuti warna aksen
+  website (`--accent`, ikut tema); pola gerakan kuda (1x2 / 2x1) otomatis menekuk seperti Chess.com. Ketuk
+  satu kotak = seluruh petak jadi merah (`SQUARE_COLOR`), dirender di bawah bidak. Di desktop klik-kanan +
+  geser; di HP tombol **Panah**. Gambar yang sama dua kali = terhapus; klik kiri di papan, langkah baru, atau
+  tombol **Hapus** membersihkannya.
+- **Premove (FriendRoom saja):** saat giliran lawan, geser bidak sendiri untuk pasang premove (petak biru).
+  Begitu lawan jalan, `ChessBoard` memanggil `api.playPremove()` dan langkahnya dikirim lewat jalur yang sama
+  dengan langkah biasa. Premove ilegal di posisi baru dibuang diam-diam; klik di tempat lain membatalkannya.
+  Mati otomatis saat putus koneksi atau game selesai. Promosi tetap auto-queen.
+- **Titik legal move:** sekarang pakai `--board-dot` (gelap, tetap di kedua tema) di `ply-theme.css`. Dulu
+  memakai `--legal-dot` yang pucat di tema gelap sehingga hampir hilang di kotak terang.
+
+## Catatan hasil verifikasi
+
+- `chessground-theme.css`: urutan warna `conic-gradient` sempat terbalik (a1 terang, a8 gelap) - sudah
+  diperbaiki dan diuji lewat render + sampling piksel (a1 gelap, h1 terang, a8 terang, h8 gelap).
+- Koordinat a-h/1-8 sekarang digambar sendiri di dalam kotak tepi (`ChessBoard.tsx`), karena koordinat
+  bawaan Chessground mengambang di luar papan dan terpotong `overflow-hidden`. Warna label otomatis
+  kontras dengan kotaknya.
+- Geometri papan (kotak <-> titik, bentuk panah, label) dipisah ke `lib/board-geometry.ts` (fungsi murni)
+  supaya bisa dites tanpa browser.
+- `vercel.json`: fallback SPA ke `index.html` agar link undangan `/friend/KODE` tidak 404 saat dibuka
+  langsung atau di-refresh di Vercel. Root Directory di Vercel harus `chessground-board`.
+- `src/vite-env.d.ts` ditambahkan (deklarasi tipe `*.css` dari `vite/client`).
+
+## Tes
+
+`tests/geometry.test.ts` menguji geometri papan (kotak <-> titik untuk kedua orientasi, tekukan panah kuda ke
+8 arah, label koordinat). Jalankan dengan `npx tsx tests/geometry.test.ts` (di luar `src/`, jadi tidak ikut
+`tsc -b`).
 
 ## Design system = Ply (siap merge)
 

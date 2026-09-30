@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import ChessBoard from '../components/ChessBoard';
+import { BoardFrame } from '../components/BoardFrame';
 import { ArrowLeft, Check, Copy } from 'lucide-react';
 import { AppHeader } from '../components/app-header';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -192,6 +192,9 @@ export default function FriendRoom() {
         showDests: true,
         events: { after: handleAfterMove },
       },
+      // Premove: gerakkan bidak sendiri saat giliran lawan; dijalankan otomatis begitu lawan jalan
+      // (lihat effect playPremove di ChessBoard.tsx). Mati kalau gak connect / game selesai.
+      premovable: { enabled: live, showDests: true },
     }),
     [boardFen, turn, check, lastMove, dests, live, myColor, handleAfterMove],
   );
@@ -245,15 +248,12 @@ export default function FriendRoom() {
       />
 
       <main className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <section className="mx-auto flex w-full max-w-[640px] flex-col gap-3">
-          <PlayerStrip color={opponent} label={`Lawan · ${name(opponent)}`} active={active && turn === opponent} />
-          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
-            <div className="aspect-square w-full">
-              {ready ? <ChessBoard config={config} /> : <div className="shimmer h-full w-full" />}
-            </div>
-          </div>
-          <PlayerStrip color={myColor} label={`Kamu · ${name(myColor)}`} active={active && turn === myColor} />
-        </section>
+        <BoardFrame
+          config={config}
+          ready={ready}
+          before={<PlayerStrip color={opponent} label={`Lawan · ${name(opponent)}`} active={active && turn === opponent} />}
+          after={<PlayerStrip color={myColor} label={`Kamu · ${name(myColor)}`} active={active && turn === myColor} />}
+        />
 
         <aside className="flex flex-col gap-5">
           <Card className="p-4">

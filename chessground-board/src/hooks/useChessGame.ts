@@ -123,7 +123,9 @@ export function useChessGame(): ChessGameState {
   const [snapshot, setSnapshot] = useState<StateSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const notationRef = useRef(new Chess());
+  // Lazy: `useRef(new Chess())` akan membuat instance baru (dibuang) di SETIAP render.
+  const [initialNotation] = useState(() => new Chess());
+  const notationRef = useRef(initialNotation);
   const [notation, setNotation] = useState<{ history: string[]; pgn: string }>({ history: [], pgn: '' });
 
   useEffect(() => {
@@ -151,7 +153,8 @@ export function useChessGame(): ChessGameState {
       // karena WASM sudah bilang legal), diam-diam skip - notasi cuma nice-to-have, gak
       // boleh sampai bikin move yang beneran berhasil kelihatan gagal.
       try {
-        notationRef.current.move({ from: orig, to: dest, promotion });
+        // WASM auto-queen kalau promotion kosong; chess.js wajib dikasih, jadi samakan ('q' diabaikan utk move biasa).
+        notationRef.current.move({ from: orig, to: dest, promotion: promotion ?? 'q' });
         if (next.gameOver) notationRef.current.header('Result', resultTag(next));
         setNotation({ history: notationRef.current.history(), pgn: notationRef.current.pgn() });
       } catch {
@@ -197,7 +200,7 @@ export function useChessGame(): ChessGameState {
       try {
         const rebuilt = new Chess();
         for (const uci of moves) {
-          rebuilt.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), ...(uci.length > 4 ? { promotion: uci[4] } : {}) });
+          rebuilt.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci.length > 4 ? uci[4] : 'q' });
         }
         if (fenKey(rebuilt.fen()) === target) {
           adopt(rebuilt);

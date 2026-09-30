@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import type { Config } from '@lichess-org/chessground/config';
 import type { Key } from '@lichess-org/chessground/types';
-import ChessBoard from '../components/ChessBoard';
+import { BoardFrame } from '../components/BoardFrame';
 import { AppHeader } from '../components/app-header';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Button } from '../components/ui/button';
@@ -79,13 +79,7 @@ export default function Game() {
       />
 
       <main className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <section className="mx-auto w-full max-w-[640px]">
-          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(0,0,0,0.35)]">
-            <div className="aspect-square w-full">
-              {ready ? <ChessBoard config={config} /> : <div className="shimmer h-full w-full" />}
-            </div>
-          </div>
-        </section>
+        <BoardFrame config={config} ready={ready} />
 
         <aside className="flex flex-col gap-5">
           <Card className="p-4" role="status" aria-live="polite">
